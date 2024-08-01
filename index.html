@@ -243,18 +243,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-        function addPlayer(name, angle) {
-    const player = document.createElement('div');
-    player.className = 'player';
-    player.style.position = 'absolute';
-    player.style.left = `${50 + 45 * Math.cos(angle)}%`;
-    player.style.top = `${50 + 45 * Math.sin(angle)}%`;
-    player.innerHTML = `
-        <div class="user-card"></div>
-        <div>${name}</div>
-    `;
-    document.getElementById('userCircle').appendChild(player);
-}
+        
         // Your Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
