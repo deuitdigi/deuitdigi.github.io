@@ -3,38 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Planning Poker</title>
+    <title>Kris' Planning Poker</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         button { margin: 5px; padding: 10px; }
+        select { margin: 5px; padding: 10px; }
         #results { margin-top: 20px; }
+        .selected { background-color: #4CAF50; color: white; }
     </style>
 </head>
 <body>
-    <h1>Simple Planning Poker</h1>
+    <h1>Kris' Planning Poker</h1>
     <div id="roomControls">
-        <input type="text" id="roomInput" placeholder="Enter room name">
-        <button onclick="createOrJoinRoom()">Create/Join Room</button>
+        <select id="teamSelect">
+            <option value="">Select a team</option>
+            <option value="Adventure Time">Adventure Time</option>
+            <option value="Moonshots">Moonshots</option>
+            <option value="Titans">Titans</option>
+            <option value="Chaos Crushers">Chaos Crushers</option>
+        </select>
+        <button onclick="joinTeam()">Join Team</button>
     </div>
     <div id="votingArea" style="display:none;">
-        <h2>Room: <span id="roomName"></span></h2>
+        <h2>Team: <span id="teamName"></span></h2>
         <div id="cards"></div>
         <button onclick="revealVotes()">Reveal Votes</button>
         <button onclick="resetVotes()">Reset</button>
     </div>
     <div id="results"></div>
 
-    <script>
-        let currentRoom = '';
-        const cards = ['1', '2', '3', '5', '8', '13', '21', '?'];
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-        function createOrJoinRoom() {
-            currentRoom = document.getElementById('roomInput').value;
-            if (currentRoom) {
-                document.getElementById('roomName').textContent = currentRoom;
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
+          authDomain: "planningpoker-68a62.firebaseapp.com",
+          projectId: "planningpoker-68a62",
+          storageBucket: "planningpoker-68a62.appspot.com",
+          messagingSenderId: "509722751729",
+          appId: "1:509722751729:web:4f5bfb49b31b6535012f50"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        const db = firebase.firestore();
+
+        let currentTeam = '';
+        const cards = ['1', '2', '3', '5', '8', '13', '21', '?'];
+        let userId;
+
+        function joinTeam() {
+            currentTeam = document.getElementById('teamSelect').value;
+            if (currentTeam) {
+                document.getElementById('teamName').textContent = currentTeam;
                 document.getElementById('roomControls').style.display = 'none';
                 document.getElementById('votingArea').style.display = 'block';
                 renderCards();
+                listenToVotes();
+                userId = localStorage.getItem('userId') || Date.now().toString();
+                localStorage.setItem('userId', userId);
+            } else {
+                alert('Please select a team');
             }
         }
 
@@ -50,36 +85,66 @@
         }
 
         function vote(value) {
-            localStorage.setItem(`${currentRoom}_${Date.now()}`, value);
+            db.collection('teams').doc(currentTeam).set({
+                [userId]: value
+            }, { merge: true });
+            highlightSelectedCard(value);
+        }
+
+        function highlightSelectedCard(selectedValue) {
+            const buttons = document.getElementById('cards').getElementsByTagName('button');
+            for (let button of buttons) {
+                if (button.textContent === selectedValue) {
+                    button.classList.add('selected');
+                } else {
+                    button.classList.remove('selected');
+                }
+            }
+        }
+
+        function listenToVotes() {
+            db.collection('teams').doc(currentTeam)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const votes = doc.data();
+                        if (votes[userId]) {
+                            highlightSelectedCard(votes[userId]);
+                        }
+                    }
+                });
         }
 
         function revealVotes() {
-            const results = document.getElementById('results');
-            results.innerHTML = '<h3>Votes:</h3>';
-            const votes = getVotes();
-            Object.keys(votes).forEach(timestamp => {
-                results.innerHTML += `<p>Vote at ${new Date(parseInt(timestamp)).toLocaleTimeString()}: ${votes[timestamp]}</p>`;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const votes = doc.data();
+                    const results = document.getElementById('results');
+                    results.innerHTML = '<h3>Votes:</h3>';
+                    if (Object.keys(votes).length === 0) {
+                        results.innerHTML += '<p>No votes yet.</p>';
+                    } else {
+                        for (let [voterId, vote] of Object.entries(votes)) {
+                            results.innerHTML += `<p>User ${voterId.slice(-4)}: ${vote}</p>`;
+                        }
+                    }
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
             });
         }
 
         function resetVotes() {
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(currentRoom)) {
-                    localStorage.removeItem(key);
+            db.collection('teams').doc(currentTeam).delete().then(() => {
+                document.getElementById('results').innerHTML = '';
+                const buttons = document.getElementById('cards').getElementsByTagName('button');
+                for (let button of buttons) {
+                    button.classList.remove('selected');
                 }
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
             });
-            document.getElementById('results').innerHTML = '';
-        }
-
-        function getVotes() {
-            const votes = {};
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(currentRoom)) {
-                    const timestamp = key.split('_')[1];
-                    votes[timestamp] = localStorage.getItem(key);
-                }
-            });
-            return votes;
         }
     </script>
 </body>
