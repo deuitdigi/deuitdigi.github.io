@@ -5,69 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kris' Planit Poker</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        body, html {
+            height: 100%;
             margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
         .container {
-            text-align: center;
-            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             max-width: 800px;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 10px;
+            box-sizing: border-box;
         }
         #logo {
             max-width: 100%;
             height: auto;
-            margin-bottom: 20px;
+            max-height: 15vh;
+            object-fit: contain;
+            margin-bottom: 10px;
         }
         #roomControls, #nameInput {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         select, input, button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
+            padding: 8px;
+            margin: 2px;
+            font-size: 14px;
             max-width: 100%;
         }
         #votingArea {
             display: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         .user-circle {
             position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 0;
-            padding-bottom: 100%;
-            margin: 20px auto;
+            flex: 1;
+            min-height: 0;
+            margin: 10px 0;
         }
         .user {
             position: absolute;
-            width: 80px;
+            width: 60px;
             text-align: center;
+            font-size: 12px;
         }
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: #ddd;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 5px;
+            margin: 0 auto 2px;
             font-weight: bold;
         }
         .user-card {
-            width: 40px;
-            height: 60px;
+            width: 30px;
+            height: 45px;
             background-color: #fff;
             border: 2px solid #000;
             border-radius: 5px;
-            margin: 0 auto 5px;
+            margin: 0 auto 2px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -87,56 +92,67 @@
             align-items: center;
         }
         #krisAvatar {
-            width: 100px;
+            width: 60px;
             height: auto;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .card-deck {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 20px;
+            padding: 10px 0;
         }
         .card {
-            width: 40px;
-            height: 60px;
+            width: 30px;
+            height: 45px;
             background-color: #fff;
             border: 2px solid #000;
             border-radius: 5px;
-            margin: 5px;
+            margin: 2px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             cursor: pointer;
+            font-size: 12px;
         }
         .card:hover {
             background-color: #f0f0f0;
         }
         #adminControls {
-            margin-top: 20px;
+            margin-top: 5px;
         }
         @media (max-width: 600px) {
+            .container {
+                padding: 5px;
+            }
+            #logo {
+                max-height: 10vh;
+            }
             .user-circle {
-                max-width: 300px;
+                margin: 5px 0;
             }
             .user {
-                width: 60px;
+                width: 50px;
             }
             .user-avatar {
                 width: 30px;
                 height: 30px;
             }
             .user-card {
-                width: 30px;
-                height: 45px;
+                width: 25px;
+                height: 35px;
             }
             #krisAvatar {
-                width: 60px;
+                width: 40px;
             }
             .card {
-                width: 30px;
-                height: 45px;
+                width: 25px;
+                height: 35px;
+                font-size: 10px;
+            }
+            select, input, button {
+                padding: 6px;
                 font-size: 12px;
             }
         }
@@ -213,7 +229,7 @@
                 document.getElementById('teamName').textContent = currentTeam;
                 document.getElementById('roomControls').style.display = 'none';
                 document.getElementById('nameInput').style.display = 'none';
-                document.getElementById('votingArea').style.display = 'block';
+                document.getElementById('votingArea').style.display = 'flex';
                 checkIfAdmin();
                 if (!isAdmin) {
                     renderCardDeck();
@@ -278,8 +294,8 @@
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
+                    const x = Math.cos(angle) * 42 + 50;
+                    const y = Math.sin(angle) * 42 + 50;
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
                     userElement.style.left = `${x}%`;
