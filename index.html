@@ -50,17 +50,7 @@
             text-align: center;
             font-size: 12px;
         }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ddd;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 2px;
-            font-weight: bold;
-        }
+        
         .user-card {
             width: 30px;
             height: 45px;
@@ -91,8 +81,8 @@
 
 .user-circle {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -22%;
+    left: -15%;
     width: 120%;
     height: 120%;
     pointer-events: none; /* This allows clicks to pass through to elements underneath */
@@ -152,10 +142,7 @@
             .user {
                 width: 50px;
             }
-            .user-avatar {
-                width: 30px;
-                height: 30px;
-            }
+           
             .user-card {
                 width: 25px;
                 height: 35px;
@@ -264,7 +251,6 @@
     player.style.top = `${50 + 45 * Math.sin(angle)}%`;
     player.innerHTML = `
         <div class="player-card"></div>
-        <div class="player-avatar">${name.charAt(0)}</div>
         <div>${name}</div>
     `;
     document.getElementById('userCircle').appendChild(player);
@@ -405,7 +391,6 @@ function updatePlayerPositions() {
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
                         <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
