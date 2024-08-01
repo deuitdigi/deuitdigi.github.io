@@ -183,12 +183,12 @@
         font-weight: bold;
     }
     #initialSetup {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
 
     </style>
 </head>
@@ -214,6 +214,7 @@
             </div>
         </div>
         <div id="votingArea" style="display:none;">
+            <button id="exitRoom" onclick="exitRoom()" style="display:none;">Exit Room</button>
             <div class="poker-table-container">
                 <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M750 650H1075V700H750V650Z" fill="#6B6B6B"/>
@@ -273,23 +274,24 @@
         });
 
         function joinTeam() {
-            currentTeam = document.getElementById('teamSelect').value;
-            currentUser = document.getElementById('userName').value;
-            if (currentTeam && currentUser) {
-                document.getElementById('teamName').textContent = currentTeam;
-                document.getElementById('roomControls').style.display = 'none';
-                document.getElementById('nameInput').style.display = 'none';
-                document.getElementById('votingArea').style.display = 'flex';
-                checkIfAdmin();
-                if (!isAdmin) {
-                    renderCardDeck();
-                    addUserToTeam();
-                }
-                listenToVotes();
-            } else {
-                alert('Please select a team and enter your name');
-            }
+    currentTeam = document.getElementById('teamSelect').value;
+    currentUser = document.getElementById('userName').value;
+    if (currentTeam && currentUser) {
+        document.getElementById('teamName').textContent = `Team: ${currentTeam}`;
+        document.getElementById('initialSetup').style.display = 'none';
+        document.getElementById('votingArea').style.display = 'block';
+        document.getElementById('exitRoom').style.display = 'block'; // Add this line
+        checkIfAdmin();
+        if (!isAdmin) {
+            renderCardDeck();
+            addUserToTeam();
         }
+        listenToVotes();
+    } else {
+        alert('Please select a team and enter your name');
+    }
+}
+        
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
@@ -389,7 +391,20 @@
                 console.error("Error resetting votes: ", error);
             });
         }
-
+function exitRoom() {
+    currentTeam = '';
+    currentUser = '';
+    isAdmin = false;
+    votesRevealed = false;
+    document.getElementById('initialSetup').style.display = 'flex';
+    document.getElementById('votingArea').style.display = 'none';
+    document.getElementById('exitRoom').style.display = 'none';
+    document.getElementById('teamSelect').value = '';
+    document.getElementById('userName').value = '';
+    document.getElementById('teamName').textContent = '';
+    // Unsubscribe from Firestore listeners if any
+    // Reset any other necessary state
+}
         function clearUsers() {
             if (!isAdmin) return;
             db.collection('teams').doc(currentTeam).get().then((doc) => {
