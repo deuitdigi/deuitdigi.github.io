@@ -7,144 +7,122 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
+            padding: 0;
             background-color: #f0f0f0;
         }
         .container {
-            text-align: center;
-            width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
         #logo {
-            max-width: 100%;
-            height: auto;
+            max-width: 200px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        #teamName {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
             margin-bottom: 20px;
         }
-        #roomControls, #nameInput {
-            margin-bottom: 20px;
-        }
-        select, input, button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-            max-width: 100%;
-        }
-        #votingArea {
-            display: none;
+        .poker-table-container {
+            position: relative;
+            width: 80%;
+            padding-top: 45%;
+            margin: 0 auto 20px;
         }
         .user-circle {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 600px;
-            height: 0;
-            padding-bottom: 100%;
-            margin: 20px auto;
+            height: 100%;
         }
         .user {
             position: absolute;
-            width: 80px;
-            text-align: center;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background-color: #ddd;
+            background-color: #4CAF50;
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 5px;
             font-weight: bold;
         }
         .user-card {
-            width: 40px;
-            height: 60px;
-            background-color: #fff;
-            border: 2px solid #000;
+            position: absolute;
+            top: -20px;
+            background-color: white;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            margin: 0 auto 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+            padding: 2px 5px;
         }
-        .voted .user-card {
-            background-color: purple;
-            color: white;
+        .voted .user-avatar {
+            border: 2px solid #4CAF50;
         }
         #centerArea {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
         #krisAvatar {
-            width: 100px;
-            height: auto;
-            margin-bottom: 10px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
         }
         .card-deck {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
+            gap: 10px;
             margin-top: 20px;
         }
         .card {
-            width: 40px;
-            height: 60px;
-            background-color: #fff;
-            border: 2px solid #000;
+            width: 60px;
+            height: 90px;
+            background-color: white;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            margin: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
+            font-size: 18px;
             cursor: pointer;
         }
-        .card:hover {
-            background-color: #f0f0f0;
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
         }
-        #adminControls {
-            margin-top: 20px;
+        #roomControls, #nameInput {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        @media (max-width: 600px) {
-            .user-circle {
-                max-width: 300px;
-            }
-            .user {
-                width: 60px;
-            }
-            .user-avatar {
-                width: 30px;
-                height: 30px;
-            }
-            .user-card {
-                width: 30px;
-                height: 45px;
-            }
-            #krisAvatar {
-                width: 60px;
-            }
-            .card {
-                width: 30px;
-                height: 45px;
-                font-size: 12px;
-            }
+        #teamSelect, #userName {
+            padding: 5px;
+            font-size: 16px;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img id="logo" src="krispokerlogo.webp" alt="Kris' Planit Poker">
+        <img src="krispokerlogo.webp" alt="Kris' Planit Poker" id="logo">
+
         <div id="roomControls">
             <select id="teamSelect">
                 <option value="">Select a team</option>
@@ -154,24 +132,31 @@
                 <option value="Chaos Crushers">Chaos Crushers</option>
             </select>
         </div>
+
         <div id="nameInput" style="display:none;">
             <input type="text" id="userName" placeholder="Enter your name">
             <button onclick="joinTeam()">Join Team</button>
         </div>
+
         <div id="votingArea" style="display:none;">
             <h2>Team: <span id="teamName"></span></h2>
-            <div class="user-circle" id="userCircle">
-                <div id="centerArea">
-                    <img id="krisAvatar" src="krisavatar.webp" alt="Kris">
-                    <div>Kris</div>
-                    <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
-                    <div id="adminControls" style="display:none;">
-                        <button onclick="resetVotes()">Reset Votes</button>
-                        <button onclick="clearUsers()">Clear All Users</button>
+            <button onclick="exitRoom()">Exit Room</button>
+
+            <div class="poker-table-container">
+                <div id="userCircle" class="user-circle">
+                    <div id="centerArea">
+                        <img src="krisavatar.webp" alt="Kris" id="krisAvatar">
+                        <div>Kris</div>
+                        <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
+                        <div id="adminControls" style="display:none;">
+                            <button onclick="resetVotes()">Reset Votes</button>
+                            <button onclick="clearUsers()">Clear All Users</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-deck" id="cardDeck"></div>
+
+            <div id="cardDeck" class="card-deck"></div>
         </div>
     </div>
 
@@ -337,6 +322,34 @@
             }).catch((error) => {
                 console.error("Error clearing users: ", error);
             });
+        }
+
+        function exitRoom() {
+            // Reset game state
+            currentTeam = '';
+            currentUser = '';
+            isAdmin = false;
+            votesRevealed = false;
+
+            // Reset UI
+            document.getElementById('roomControls').style.display = 'block';
+            document.getElementById('nameInput').style.display = 'none';
+            document.getElementById('votingArea').style.display = 'none';
+            document.getElementById('adminControls').style.display = 'none';
+            document.getElementById('userName').value = '';
+            document.getElementById('teamSelect').selectedIndex = 0;
+            document.getElementById('teamName').textContent = '';
+            document.getElementById('userCircle').innerHTML = '';
+            document.getElementById('cardDeck').innerHTML = '';
+
+            // Remove user from the team in Firestore
+            if (currentTeam && currentUser) {
+                db.collection('teams').doc(currentTeam).update({
+                    [currentUser]: firebase.firestore.FieldValue.delete()
+                }).catch((error) => {
+                    console.error("Error removing user from team: ", error);
+                });
+            }
         }
     </script>
 </body>
