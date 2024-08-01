@@ -346,21 +346,22 @@ function updatePlayerPositions() {
         if (doc.exists) {
             const users = doc.data();
             const userCount = Object.keys(users).length;
-            
+
             // Clear existing players
             const userCircle = document.getElementById('userCircle');
-            Array.from(userCircle.getElementsByClassName('player')).forEach(el => el.remove());
+            userCircle.innerHTML = ''; // Clear all children elements
             
             // Add players
             Object.keys(users).forEach((userName, index) => {
                 if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                    const angle = (index / userCount) * 2 * Math.PI; // Avoid divide by zero
                     addPlayer(userName, angle);
                 }
             });
         }
     });
 }
+
 
         function listenToVotes() {
     db.collection('teams').doc(currentTeam)
@@ -374,30 +375,32 @@ function updatePlayerPositions() {
 }
 
         function updateUserCircle(votes) {
-            const userCircle = document.getElementById('userCircle');
-            const centerArea = document.getElementById('centerArea');
-            userCircle.innerHTML = '';
-            userCircle.appendChild(centerArea);
-            const userCount = Object.keys(votes).length;
-            let index = 0;
-            Object.entries(votes).forEach(([userName, userData]) => {
-                if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 42 + 50;
-                    const y = Math.sin(angle) * 42 + 50;
-                    const userElement = document.createElement('div');
-                    userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    userElement.style.left = `${x}%`;
-                    userElement.style.top = `${y}%`;
-                    userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div>${userName}</div>
-                    `;
-                    userCircle.appendChild(userElement);
-                    index++;
-                }
-            });
+    const userCircle = document.getElementById('userCircle');
+    const centerArea = document.getElementById('centerArea');
+    userCircle.innerHTML = ''; // Clear all children elements
+    userCircle.appendChild(centerArea);
+
+    const userCount = Object.keys(votes).length;
+    let index = 0;
+    Object.entries(votes).forEach(([userName, userData]) => {
+        if (userName.toLowerCase() !== 'kris') {
+            const angle = (index / userCount) * 2 * Math.PI;
+            const x = Math.cos(angle) * 42 + 50;
+            const y = Math.sin(angle) * 42 + 50;
+            const userElement = document.createElement('div');
+            userElement.className = 'user' + (userData.vote ? ' voted' : '');
+            userElement.style.left = `${x}%`;
+            userElement.style.top = `${y}%`;
+            userElement.innerHTML = `
+                <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                <div>${userName}</div>
+            `;
+            userCircle.appendChild(userElement);
+            index++;
         }
+    });
+}
+
 
         function revealVotes() {
             if (!isAdmin) return;
