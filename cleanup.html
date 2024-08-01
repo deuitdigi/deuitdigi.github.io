@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kris' Planit Poker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #logo {
+            max-width: 200px;
+        }
+        #teamName {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .poker-table-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .poker-table {
+            width: 100%;
+            height: auto;
+        }
+        #playersArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .player-circle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        #centerArea {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        #krisAvatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+        }
+        .card-deck {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .card.selected {
+            border: 2px solid #4CAF50;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="krispokerlogo.webp" alt="Kris' Planit Poker" id="logo">
+            <div id="teamName"></div>
+        </header>
+
+        <main>
+            <section id="initialSetup">
+                <div id="roomControls">
+                    <label for="teamSelect">Select a team:</label>
+                    <select id="teamSelect">
+                        <option value="Adventure Time">Adventure Time</option>
+                        <option value="Moonshots">Moonshots</option>
+                        <option value="Titans">Titans</option>
+                        <option value="Chaos Crushers">Chaos Crushers</option>
+                    </select>
+                </div>
+                <div id="nameInput" style="display:none;">
+                    <input type="text" id="playerName" placeholder="Enter your name">
+                    <button id="joinTeam">Join Team</button>
+                </div>
+            </section>
+
+            <section id="votingArea" style="display:none;">
+                <button id="exitRoom">Exit Room</button>
+
+                <div class="poker-table-container">
+                    <img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0icG9rZXItdGFibGUiIHZpZXdib3g9IjAgMCAxNDUwIDcwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgICAgICAgICAgPHBhdGggZD0iTTc1MCA2NTBIMTA3NVY3MDBINzUwVjY1MFoiIGZpbGw9IiM2QjZCNkIiPjwvcGF0aD4KICAgICAgICAgICAgPHBhdGggZD0iTTM3NSA2NTBINzAwVjcwMEgzNzVWNjUwWiIgZmlsbD0iIzZCNkI2QiI+PC9wYXRoPgogICAgICAgICAgICA8cGF0aCBkPSJNNzUwIDBIMTA3NVY1MEg3NTBWMFoiIGZpbGw9IiM2QjZCNkIiPjwvcGF0aD4KICAgICAgICAgICAgPHBhdGggZD0iTTM3NSAwSDcwMFY1MEgzNzVWMFoiIGZpbGw9IiM2QjZCNkIiPjwvcGF0aD4KICAgICAgICAgICAgPHBhdGggZD0iTTUwIDM1MEM1MCAxOTMuMDI3IDE3MS4yNzYgNjQuMDUzMyAzMjUgNTEuMjhWMS4yNzk5N0MxNDMuNjggMTQuMTgxIDAgMTY1LjQ1MyAwIDM1MEMwIDUzNC41NDcgMTQzLjY4IDY4NS44MjcgMzI1IDY5OC43MlY2NDguNzJDMTcxLjI4IDYzNS45NDQgNTAgNTA2Ljk3MyA1MCAzNTBaIiBmaWxsPSIjNkI2QjZCIj48L3BhdGg+CiAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMzUwLjA3IDM1MEMxMzUwLjA3IDIxMi4xNDcgMTIzNy45MiAxMDAgMTEwMC4wNyAxMDBIMzUwLjA2N0MyMTIuMjEzIDEwMCAxMDAuMDY3IDIxMi4xNTEgMTAwLjA2NyAzNTBDMTAwLjA2NyA0ODcuODQ5IDIxMi4yMTcgNjAwIDM1MC4wNjcgNjAwSDExMDAuMDdDMTIzNy45MiA2MDAgMTM1MC4wNyA0ODcuODQ5IDEzNTAuMDcgMzUwWiIgZmlsbD0iIzZCNkI2QiI+PC9wYXRoPgogICAgICAgICAgICA8cGF0aCBkPSJNMTEyNSAxLjI3OTk3VjUxLjI4QzEyNzguNzIgNjQuMDU2IDE0MDAgMTkzLjAyNyAxNDAwIDM1MEMxNDAwIDUwNi45NzMgMTI3OC43MiA2MzUuOTQ3IDExMjUgNjQ4LjcyVjY5OC43MkMxMzA2LjMyIDY4NS44MTkgMTQ1MCA1MzQuNTQ3IDE0NTAgMzUwQzE0NTAgMTY1LjQ1MyAxMzA2LjMyIDE0LjE3MzMgMTEyNSAxLjI3OTk3WiIgZmlsbD0iIzZCNkI2QiI+PC9wYXRoPgogICAgICAgIDwvc3ZnPg==" alt="Poker Table" class="poker-table">
+                    
+                    <div id="playersArea">
+                        <!-- Player circles will be dynamically added here -->
+                    </div>
+
+                    <div id="centerArea">
+                        <img src="krisavatar.webp" alt="Kris" id="krisAvatar">
+                        <div id="adminName">Kris</div>
+                        <button id="revealCards">Reveal cards</button>
+                        <div id="adminControls" style="display:none;">
+                            <button id="resetVotes">Reset Votes</button>
+                            <button id="clearAllUsers">Clear All Users</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cardDeck" class="card-deck">
+                    <!-- Card options will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Game state
+        let currentPlayer = null;
+        let players = [];
+        let isAdmin = false;
+        let selectedCard = null;
+
+        // DOM elements
+        const initialSetup = document.getElementById('initialSetup');
+        const roomControls = document.getElementById('roomControls');
+        const nameInput = document.getElementById('nameInput');
+        const playerNameInput = document.getElementById('playerName');
+        const joinTeamButton = document.getElementById('joinTeam');
+        const teamSelect = document.getElementById('teamSelect');
+        const teamNameDisplay = document.getElementById('teamName');
+        const votingArea = document.getElementById('votingArea');
+        const exitRoomButton = document.getElementById('exitRoom');
+        const playersArea = document.getElementById('playersArea');
+        const cardDeck = document.getElementById('cardDeck');
+        const revealCardsButton = document.getElementById('revealCards');
+        const adminControls = document.getElementById('adminControls');
+        const resetVotesButton = document.getElementById('resetVotes');
+        const clearAllUsersButton = document.getElementById('clearAllUsers');
+
+        // Event listeners
+        teamSelect.addEventListener('change', showNameInput);
+        joinTeamButton.addEventListener('click', joinTeam);
+        exitRoomButton.addEventListener('click', exitRoom);
+        revealCardsButton.addEventListener('click', revealCards);
+        resetVotesButton.addEventListener('click', resetVotes);
+        clearAllUsersButton.addEventListener('click', clearAllUsers);
+
+        // Functions
+        function showNameInput() {
+            roomControls.style.display = 'none';
+            nameInput.style.display = 'block';
+            teamNameDisplay.textContent = teamSelect.value;
+        }
+
+        function joinTeam() {
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                currentPlayer = {
+                    name: playerName,
+                    team: teamSelect.value
+                };
+                players.push(currentPlayer);
+                initialSetup.style.display = 'none';
+                votingArea.style.display = 'block';
+                setupGame();
+            }
+        }
+
+        function setupGame() {
+            createPlayerCircles();
+            createCardDeck();
+            if (currentPlayer.name === 'Kris') {
+                isAdmin = true;
+                adminControls.style.display = 'block';
+            }
+        }
+
+        function createPlayerCircles() {
+            players.forEach((player, index) => {
+                const circle = document.createElement('div');
+                circle.className = 'player-circle';
+                circle.textContent = player.name[0].toUpperCase();
+                circle.style.left = `${50 + 40 * Math.cos(index * 2 * Math.PI / players.length)}%`;
+                circle.style.top = `${50 + 40 * Math.sin(index * 2 * Math.PI / players.length)}%`;
+                playersArea.appendChild(circle);
+            });
+        }
+
+        function createCardDeck() {
+            const cards = ['0', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?'];
+            cards.forEach(value => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = value;
+                card.addEventListener('click', () => selectCard(card, value));
+                cardDeck.appendChild(card);
+            });
+        }
+
+        function selectCard(cardElement, value) {
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+            }
+            selectedCard = cardElement;
+            selectedCard.classList.add('selected');
+            // Here you would typically send this selection to the server
+        }
+
+        function exitRoom() {
+            // Reset game state
+            currentPlayer = null;
+            players = [];
+            isAdmin = false;
+            selectedCard = null;
+
+            // Reset UI
+            initialSetup.style.display = 'block';
+            roomControls.style.display = 'block';
+            nameInput.style.display = 'none';
+            votingArea.style.display = 'none';
+            adminControls.style.display = 'none';
+            playerNameInput.value = '';
+            teamSelect.selectedIndex = 0;
+            teamNameDisplay.textContent = '';
+            playersArea.innerHTML = '';
+            cardDeck.innerHTML = '';
+        }
+
+        function revealCards() {
+            // Here you would typically reveal all players' cards
+            console.log('Revealing cards');
+        }
+
+        function resetVotes() {
+            if (isAdmin) {
+                // Reset all votes
+                console.log('Resetting votes');
+                if (selectedCard) {
+                    selectedCard.classList.remove('selected');
+                    selectedCard = null;
+                }
+            }
+        }
+
+        function clearAllUsers() {
+            if (isAdmin) {
+                // Clear all users except admin
+                console.log('Clearing all users');
+                players = players.filter(player => player.name === 'Kris');
+                playersArea.innerHTML = '';
+                createPlayerCircles();
+            }
+        }
+    </script>
+</body>
+</html>
