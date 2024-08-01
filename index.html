@@ -97,7 +97,6 @@
         }
         #adminControls {
             margin-top: 20px;
-            display: none;
         }
     </style>
 </head>
@@ -126,7 +125,7 @@
             </div>
             <div class="card-deck" id="cardDeck"></div>
         </div>
-        <div id="adminControls">
+        <div id="adminControls" style="display:none;">
             <button onclick="resetVotes()">Reset Votes</button>
             <button onclick="clearUsers()">Clear All Users</button>
         </div>
@@ -188,6 +187,7 @@
 
         function renderCardDeck() {
             const cardDeck = document.getElementById('cardDeck');
+            cardDeck.innerHTML = ''; // Clear existing cards
             cards.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
@@ -265,6 +265,8 @@
                 }
             }).then(() => {
                 console.log("Votes reset successfully");
+                updateUserCircle({}); // Clear the displayed votes
+                renderCardDeck(); // Re-render the card deck
             }).catch((error) => {
                 console.error("Error resetting votes: ", error);
             });
