@@ -43,13 +43,7 @@
             display: flex;
             flex-direction: column;
         }
-        .user-circle {
-           position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        }
+        
         .user {
             position: absolute;
             width: 60px;
@@ -83,34 +77,48 @@
             background-color: purple;
             color: white;
         }
-        #centerArea {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            align-items: center;
-        }
-        #krisAvatar {
-            width: 60px;
-            height: auto;
-            margin-bottom: 5px;
-             border-radius: 50%;
-        }
-         .poker-table-container {
-        width: 70%;
-        margin: 0 auto;
-        position: relative;
-    }
-    .poker-table {
-        width: 100%;
-        height: auto;
-    }
-        .card-deck {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 10px 0;
-        }
+        
+       .poker-table-container {
+    position: relative;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.poker-table {
+    width: 100%;
+    height: auto;
+}
+
+.user-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* This allows clicks to pass through to elements underneath */
+}
+
+#centerArea {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: auto; /* This allows interaction with Kris and buttons */
+}
+
+#krisAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.card-deck {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
         .card {
             width: 30px;
             height: 45px;
@@ -214,32 +222,32 @@
                 <button onclick="joinTeam()">Join Team</button>
             </div>
         </div>
-        <div id="votingArea" style="display:none;">
-            <button id="exitRoom" onclick="exitRoom()" style="display:none;">Exit Room</button>
-            <div class="poker-table-container">
-                <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M750 650H1075V700H750V650Z" fill="#6B6B6B"/>
-                    <path d="M375 650H700V700H375V650Z" fill="#6B6B6B"/>
-                    <path d="M750 0H1075V50H750V0Z" fill="#6B6B6B"/>
-                    <path d="M375 0H700V50H375V0Z" fill="#6B6B6B"/>
-                    <path d="M50 350C50 193.027 171.276 64.0533 325 51.28V1.27997C143.68 14.181 0 165.453 0 350C0 534.547 143.68 685.827 325 698.72V648.72C171.28 635.944 50 506.973 50 350Z" fill="#6B6B6B"/>
-                    <path d="M1350.07 350C1350.07 212.147 1237.92 100 1100.07 100H350.067C212.213 100 100.067 212.151 100.067 350C100.067 487.849 212.217 600 350.067 600H1100.07C1237.92 600 1350.07 487.849 1350.07 350Z" fill="#6B6B6B"/>
-                    <path d="M1125 1.27997V51.28C1278.72 64.056 1400 193.027 1400 350C1400 506.973 1278.72 635.947 1125 648.72V698.72C1306.32 685.819 1450 534.547 1450 350C1450 165.453 1306.32 14.1733 1125 1.27997Z" fill="#6B6B6B"/>
-                  </svg>
-                    <div id="userCircle" class="user-circle">
-                        <div id="centerArea">
-                            <img id="krisAvatar" src="krisavatar.webp" alt="Kris">
-                            <div>Kris</div>
-                            <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
-                            <div id="adminControls" style="display:none;">
-                                <button onclick="resetVotes()">Reset Votes</button>
-                                <button onclick="clearUsers()">Clear All Users</button>
-                            </div>
-                        </div>
-                    </div>
+       <div id="votingArea" style="display:none;">
+    <button id="exitRoom" onclick="exitRoom()" style="display:none;">Exit Room</button>
+    <div class="poker-table-container">
+        <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M750 650H1075V700H750V650Z" fill="#6B6B6B"/>
+            <path d="M375 650H700V700H375V650Z" fill="#6B6B6B"/>
+            <path d="M750 0H1075V50H750V0Z" fill="#6B6B6B"/>
+            <path d="M375 0H700V50H375V0Z" fill="#6B6B6B"/>
+            <path d="M50 350C50 193.027 171.276 64.0533 325 51.28V1.27997C143.68 14.181 0 165.453 0 350C0 534.547 143.68 685.827 325 698.72V648.72C171.28 635.944 50 506.973 50 350Z" fill="#6B6B6B"/>
+            <path d="M1350.07 350C1350.07 212.147 1237.92 100 1100.07 100H350.067C212.213 100 100.067 212.151 100.067 350C100.067 487.849 212.217 600 350.067 600H1100.07C1237.92 600 1350.07 487.849 1350.07 350Z" fill="#6B6B6B"/>
+            <path d="M1125 1.27997V51.28C1278.72 64.056 1400 193.027 1400 350C1400 506.973 1278.72 635.947 1125 648.72V698.72C1306.32 685.819 1450 534.547 1450 350C1450 165.453 1306.32 14.1733 1125 1.27997Z" fill="#6B6B6B"/>
+        </svg>
+        <div id="userCircle" class="user-circle">
+            <div id="centerArea">
+                <img id="krisAvatar" src="krisavatar.webp" alt="Kris">
+                <div>Kris</div>
+                <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
+                <div id="adminControls" style="display:none;">
+                    <button onclick="resetVotes()">Reset Votes</button>
+                    <button onclick="clearUsers()">Clear All Users</button>
                 </div>
-            <div class="card-deck" id="cardDeck"></div>
+            </div>
         </div>
+    </div>
+    <div class="card-deck" id="cardDeck"></div>
+</div>
     </div>
 
 
@@ -248,6 +256,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
+        function addPlayer(name, angle) {
+    const player = document.createElement('div');
+    player.className = 'player';
+    player.style.position = 'absolute';
+    player.style.left = `${50 + 45 * Math.cos(angle)}%`;
+    player.style.top = `${50 + 45 * Math.sin(angle)}%`;
+    player.innerHTML = `
+        <div class="player-card"></div>
+        <div class="player-avatar">${name.charAt(0)}</div>
+        <div>${name}</div>
+    `;
+    document.getElementById('userCircle').appendChild(player);
+}
         // Your Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
@@ -322,20 +343,49 @@
         }
 
         function addUserToTeam() {
-            db.collection('teams').doc(currentTeam).set({
-                [currentUser]: {vote: null, timestamp: Date.now()}
-            }, { merge: true });
+    db.collection('teams').doc(currentTeam).set({
+        [currentUser]: {vote: null, timestamp: Date.now()}
+    }, { merge: true })
+    .then(() => {
+        // After successfully adding to the database, update the UI
+        updatePlayerPositions();
+    })
+    .catch((error) => {
+        console.error("Error adding user to team: ", error);
+    });
+}
+
+function updatePlayerPositions() {
+    db.collection('teams').doc(currentTeam).get().then((doc) => {
+        if (doc.exists) {
+            const users = doc.data();
+            const userCount = Object.keys(users).length;
+            
+            // Clear existing players
+            const userCircle = document.getElementById('userCircle');
+            Array.from(userCircle.getElementsByClassName('player')).forEach(el => el.remove());
+            
+            // Add players
+            Object.keys(users).forEach((userName, index) => {
+                if (userName.toLowerCase() !== 'kris') {
+                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                    addPlayer(userName, angle);
+                }
+            });
         }
+    });
+}
 
         function listenToVotes() {
-            db.collection('teams').doc(currentTeam)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const votes = doc.data();
-                        updateUserCircle(votes);
-                    }
-                });
-        }
+    db.collection('teams').doc(currentTeam)
+        .onSnapshot((doc) => {
+            if (doc.exists) {
+                const votes = doc.data();
+                updateUserCircle(votes);
+                updatePlayerPositions();  // Add this line
+            }
+        });
+}
 
         function updateUserCircle(votes) {
             const userCircle = document.getElementById('userCircle');
