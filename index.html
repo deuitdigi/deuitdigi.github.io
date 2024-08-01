@@ -31,8 +31,8 @@
         }
         .poker-table-container {
             position: relative;
-            width: 80%; /* Reduced to 80% of the original size */
-            padding-top: 45%; /* Adjusted for 16:9 aspect ratio at 80% size */
+            width: 80%;
+            padding-top: 45%;
             margin: 0 auto;
         }
         .poker-table {
@@ -42,17 +42,25 @@
             width: 100%;
             height: 100%;
         }
-        #playersArea {
+        #userCircle {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
         }
-        .player-circle {
+        .user {
             position: absolute;
             width: 60px;
             height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: #4CAF50;
             color: white;
@@ -61,14 +69,25 @@
             align-items: center;
             font-weight: bold;
         }
+        .user-card {
+            position: absolute;
+            top: -20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 2px 5px;
+        }
+        .voted .user-avatar {
+            border: 2px solid #4CAF50;
+        }
         #centerArea {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            width: 50%; /* Adjust as needed */
-            height: 50%; /* Adjust as needed */
+            width: 50%;
+            height: 50%;
         }
         #krisAvatar {
             max-width: 100%;
@@ -94,9 +113,6 @@
             font-size: 18px;
             cursor: pointer;
         }
-        .card.selected {
-            border: 2px solid #4CAF50;
-        }
         button {
             padding: 10px 20px;
             margin: 5px;
@@ -117,6 +133,7 @@
                 <div id="roomControls">
                     <label for="teamSelect">Select a team:</label>
                     <select id="teamSelect">
+                        <option value="">Select a team</option>
                         <option value="Adventure Time">Adventure Time</option>
                         <option value="Moonshots">Moonshots</option>
                         <option value="Titans">Titans</option>
@@ -124,13 +141,13 @@
                     </select>
                 </div>
                 <div id="nameInput" style="display:none;">
-                    <input type="text" id="playerName" placeholder="Enter your name">
-                    <button id="joinTeam">Join Team</button>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                    <button onclick="joinTeam()">Join Team</button>
                 </div>
             </section>
 
             <section id="votingArea" style="display:none;">
-                <button id="exitRoom">Exit Room</button>
+                <button onclick="exitRoom()">Exit Room</button>
 
                 <div class="poker-table-container">
                     <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,17 +160,15 @@
                         <path d="M1125 1.27997V51.28C1278.72 64.056 1400 193.027 1400 350C1400 506.973 1278.72 635.947 1125 648.72V698.72C1306.32 685.819 1450 534.547 1450 350C1450 165.453 1306.32 14.1733 1125 1.27997Z" fill="#6B6B6B"></path>
                     </svg>
                     
-                    <div id="playersArea">
-                        <!-- Player circles will be dynamically added here -->
-                    </div>
-
-                    <div id="centerArea">
-                        <img src="krisavatar.webp" alt="Kris" id="krisAvatar">
-                        <div id="adminName">Kris</div>
-                        <div id="adminControls" style="display:none;">
-                            <button id="revealCards">Reveal cards</button>
-                            <button id="resetVotes">Reset Votes</button>
-                            <button id="clearAllUsers">Clear All Users</button>
+                    <div id="userCircle">
+                        <div id="centerArea">
+                            <img src="krisavatar.webp" alt="Kris" id="krisAvatar">
+                            <div id="adminName">Kris</div>
+                            <div id="adminControls" style="display:none;">
+                                <button id="revealButton" onclick="revealVotes()">Reveal cards</button>
+                                <button onclick="resetVotes()">Reset Votes</button>
+                                <button onclick="clearUsers()">Clear All Users</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -165,148 +180,189 @@
         </main>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <script>
-        // Game state
-        let currentPlayer = null;
-        let players = [];
+        // Your Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
+          authDomain: "planningpoker-68a62.firebaseapp.com",
+          projectId: "planningpoker-68a62",
+          storageBucket: "planningpoker-68a62.appspot.com",
+          messagingSenderId: "509722751729",
+          appId: "1:509722751729:web:4f5bfb49b31b6535012f50"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentTeam = '';
+        let currentUser = '';
+        const cards = ['0', '1', '2', '3', '5', '8', '13', '?', '☕'];
         let isAdmin = false;
-        let selectedCard = null;
+        let votesRevealed = false;
 
-        // DOM elements
-        const initialSetup = document.getElementById('initialSetup');
-        const roomControls = document.getElementById('roomControls');
-        const nameInput = document.getElementById('nameInput');
-        const playerNameInput = document.getElementById('playerName');
-        const joinTeamButton = document.getElementById('joinTeam');
-        const teamSelect = document.getElementById('teamSelect');
-        const teamNameDisplay = document.getElementById('teamName');
-        const votingArea = document.getElementById('votingArea');
-        const exitRoomButton = document.getElementById('exitRoom');
-        const playersArea = document.getElementById('playersArea');
-        const cardDeck = document.getElementById('cardDeck');
-        const adminControls = document.getElementById('adminControls');
-        const revealCardsButton = document.getElementById('revealCards');
-        const resetVotesButton = document.getElementById('resetVotes');
-        const clearAllUsersButton = document.getElementById('clearAllUsers');
-
-        // Event listeners
-        teamSelect.addEventListener('change', showNameInput);
-        joinTeamButton.addEventListener('click', joinTeam);
-        exitRoomButton.addEventListener('click', exitRoom);
-        revealCardsButton.addEventListener('click', revealCards);
-        resetVotesButton.addEventListener('click', resetVotes);
-        clearAllUsersButton.addEventListener('click', clearAllUsers);
-
-        // Functions
-        function showNameInput() {
-            roomControls.style.display = 'none';
-            nameInput.style.display = 'block';
-            teamNameDisplay.textContent = teamSelect.value;
-        }
+        document.getElementById('teamSelect').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('nameInput').style.display = 'block';
+            }
+        });
 
         function joinTeam() {
-            const playerName = playerNameInput.value.trim();
-            if (playerName) {
-                currentPlayer = {
-                    name: playerName,
-                    team: teamSelect.value
-                };
-                players.push(currentPlayer);
-                initialSetup.style.display = 'none';
-                votingArea.style.display = 'block';
-                setupGame();
+            currentTeam = document.getElementById('teamSelect').value;
+            currentUser = document.getElementById('userName').value;
+            if (currentTeam && currentUser) {
+                document.getElementById('teamName').textContent = currentTeam;
+                document.getElementById('initialSetup').style.display = 'none';
+                document.getElementById('votingArea').style.display = 'block';
+                checkIfAdmin();
+                if (!isAdmin) {
+                    renderCardDeck();
+                    addUserToTeam();
+                }
+                listenToVotes();
+            } else {
+                alert('Please select a team and enter your name');
             }
         }
 
-        function setupGame() {
-            createPlayerCircles();
-            createCardDeck();
-            if (currentPlayer.name.toLowerCase() === 'kris') {
-                isAdmin = true;
-                adminControls.style.display = 'block';
+        function checkIfAdmin() {
+            isAdmin = (currentUser.toLowerCase() === 'kris');
+            document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('revealButton').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('cardDeck').style.display = isAdmin ? 'none' : 'flex';
+        }
+
+        function renderCardDeck() {
+            const cardDeck = document.getElementById('cardDeck');
+            cardDeck.innerHTML = ''; // Clear existing cards
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.textContent = card;
+                cardElement.onclick = () => vote(card);
+                cardDeck.appendChild(cardElement);
+            });
+        }
+
+        function vote(value) {
+            if (!isAdmin) {
+                db.collection('teams').doc(currentTeam).set({
+                    [currentUser]: {vote: value, timestamp: Date.now()}
+                }, { merge: true });
             }
         }
 
-        function createPlayerCircles() {
-            players.forEach((player, index) => {
-                if (player.name.toLowerCase() !== 'kris') {
-                    const circle = document.createElement('div');
-                    circle.className = 'player-circle';
-                    circle.textContent = player.name[0].toUpperCase();
-                    const angle = (index * 2 * Math.PI / (players.length - 1)) - Math.PI / 2;
-                    circle.style.left = `${50 + 45 * Math.cos(angle)}%`;
-                    circle.style.top = `${50 + 45 * Math.sin(angle)}%`;
-                    playersArea.appendChild(circle);
+        function addUserToTeam() {
+            db.collection('teams').doc(currentTeam).set({
+                [currentUser]: {vote: null, timestamp: Date.now()}
+            }, { merge: true });
+        }
+
+        function listenToVotes() {
+            db.collection('teams').doc(currentTeam)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const votes = doc.data();
+                        updateUserCircle(votes);
+                    }
+                });
+        }
+
+        function updateUserCircle(votes) {
+            const userCircle = document.getElementById('userCircle');
+            const centerArea = document.getElementById('centerArea');
+            userCircle.innerHTML = '';
+            userCircle.appendChild(centerArea);
+            const userCount = Object.keys(votes).length;
+            let index = 0;
+            Object.entries(votes).forEach(([userName, userData]) => {
+                if (userName.toLowerCase() !== 'kris') {
+                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                    const x = Math.cos(angle) * 45 + 50;
+                    const y = Math.sin(angle) * 45 + 50;
+                    const userElement = document.createElement('div');
+                    userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                    userElement.style.left = `${x}%`;
+                    userElement.style.top = `${y}%`;
+                    userElement.innerHTML = `
+                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
+                        <div>${userName}</div>
+                    `;
+                    userCircle.appendChild(userElement);
+                    index++;
                 }
             });
         }
 
-        function createCardDeck() {
-            const cards = ['0', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?'];
-            cards.forEach(value => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.textContent = value;
-                card.addEventListener('click', () => selectCard(card, value));
-                cardDeck.appendChild(card);
+        function revealVotes() {
+            if (!isAdmin) return;
+            votesRevealed = true;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    updateUserCircle(doc.data());
+                }
             });
         }
 
-        function selectCard(cardElement, value) {
-            if (selectedCard) {
-                selectedCard.classList.remove('selected');
-            }
-            selectedCard = cardElement;
-            selectedCard.classList.add('selected');
-            // Here you would typically send this selection to the server
+        function resetVotes() {
+            if (!isAdmin) return;
+            votesRevealed = false;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = doc.data();
+                    Object.keys(users).forEach(user => {
+                        users[user].vote = null;
+                    });
+                    return db.collection('teams').doc(currentTeam).set(users);
+                }
+            }).then(() => {
+                console.log("Votes reset successfully");
+                updateUserCircle({}); // Clear the displayed votes
+            }).catch((error) => {
+                console.error("Error resetting votes: ", error);
+            });
+        }
+
+        function clearUsers() {
+            if (!isAdmin) return;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = { 'kris': { vote: null, timestamp: Date.now() } };
+                    return db.collection('teams').doc(currentTeam).set(users);
+                }
+            }).then(() => {
+                console.log("Users cleared successfully");
+                updateUserCircle({ 'kris': { vote: null, timestamp: Date.now() } });
+            }).catch((error) => {
+                console.error("Error clearing users: ", error);
+            });
         }
 
         function exitRoom() {
             // Reset game state
-            currentPlayer = null;
-            players = [];
+            currentTeam = '';
+            currentUser = '';
             isAdmin = false;
-            selectedCard = null;
+            votesRevealed = false;
 
             // Reset UI
-            initialSetup.style.display = 'block';
-            roomControls.style.display = 'block';
-            nameInput.style.display = 'none';
-            votingArea.style.display = 'none';
-            adminControls.style.display = 'none';
-            playerNameInput.value = '';
-            teamSelect.selectedIndex = 0;
-            teamNameDisplay.textContent = '';
-            playersArea.innerHTML = '';
-            cardDeck.innerHTML = '';
-        }
+            document.getElementById('initialSetup').style.display = 'block';
+            document.getElementById('votingArea').style.display = 'none';
+            document.getElementById('adminControls').style.display = 'none';
+            document.getElementById('userName').value = '';
+            document.getElementById('teamSelect').selectedIndex = 0;
+            document.getElementById('teamName').textContent = '';
+            document.getElementById('userCircle').innerHTML = '';
+            document.getElementById('cardDeck').innerHTML = '';
 
-        function revealCards() {
-            if (isAdmin) {
-                // Here you would typically reveal all players' cards
-                console.log('Revealing cards');
-            }
-        }
-
-        function resetVotes() {
-            if (isAdmin) {
-                // Reset all votes
-                console.log('Resetting votes');
-                if (selectedCard) {
-                    selectedCard.classList.remove('selected');
-                    selectedCard = null;
-                }
-            }
-        }
-
-        function clearAllUsers() {
-            if (isAdmin) {
-                // Clear all users except admin
-                console.log('Clearing all users');
-                players = players.filter(player => player.name.toLowerCase() === 'kris');
-                playersArea.innerHTML = '';
-                createPlayerCircles();
-            }
+            // Unsubscribe from Firebase listeners (if any)
+            // Note: You may need to keep a reference to the unsubscribe function when setting up the listener
+            // and call it here if you have any active listeners.
         }
     </script>
 </body>
