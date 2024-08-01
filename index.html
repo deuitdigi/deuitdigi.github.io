@@ -18,6 +18,7 @@
             text-align: center;
             width: 100%;
             max-width: 800px;
+            padding: 20px;
         }
         #logo {
             max-width: 100%;
@@ -31,14 +32,17 @@
             padding: 10px;
             margin: 5px;
             font-size: 16px;
+            max-width: 100%;
         }
         #votingArea {
             display: none;
         }
         .user-circle {
             position: relative;
-            width: 600px;
-            height: 600px;
+            width: 100%;
+            max-width: 600px;
+            height: 0;
+            padding-bottom: 100%;
             margin: 20px auto;
         }
         .user {
@@ -90,6 +94,7 @@
         .card-deck {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             margin-top: 20px;
         }
         .card {
@@ -98,7 +103,7 @@
             background-color: #fff;
             border: 2px solid #000;
             border-radius: 5px;
-            margin: 0 5px;
+            margin: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -110,6 +115,30 @@
         }
         #adminControls {
             margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .user-circle {
+                max-width: 300px;
+            }
+            .user {
+                width: 60px;
+            }
+            .user-avatar {
+                width: 30px;
+                height: 30px;
+            }
+            .user-card {
+                width: 30px;
+                height: 45px;
+            }
+            #krisAvatar {
+                width: 60px;
+            }
+            .card {
+                width: 30px;
+                height: 45px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -249,12 +278,12 @@
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 250 + 250;
-                    const y = Math.sin(angle) * 250 + 250;
+                    const x = Math.cos(angle) * 45 + 50;
+                    const y = Math.sin(angle) * 45 + 50;
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    userElement.style.left = `${x}px`;
-                    userElement.style.top = `${y}px`;
+                    userElement.style.left = `${x}%`;
+                    userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
                         <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
@@ -283,9 +312,7 @@
                 if (doc.exists) {
                     const users = doc.data();
                     Object.keys(users).forEach(user => {
-                        if (user.toLowerCase() !== 'kris') {
-                            users[user].vote = null;
-                        }
+                        users[user].vote = null;
                     });
                     return db.collection('teams').doc(currentTeam).set(users);
                 }
@@ -299,10 +326,14 @@
 
         function clearUsers() {
             if (!isAdmin) return;
-            db.collection('teams').doc(currentTeam).delete().then(() => {
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = { 'kris': { vote: null, timestamp: Date.now() } };
+                    return db.collection('teams').doc(currentTeam).set(users);
+                }
+            }).then(() => {
                 console.log("Users cleared successfully");
-                // Redirect all users to the team selection page
-                window.location.reload();
+                updateUserCircle({ 'kris': { vote: null, timestamp: Date.now() } });
             }).catch((error) => {
                 console.error("Error clearing users: ", error);
             });
