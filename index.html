@@ -5,447 +5,308 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kris' Planit Poker</title>
     <style>
-        body, html {
-            height: 100%;
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
         .container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
-            box-sizing: border-box;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
         #logo {
-            max-width: 100%;
-            height: auto;
-            max-height: 15vh;
-            object-fit: contain;
-            margin-bottom: 10px;
+            max-width: 200px;
         }
-        #roomControls, #nameInput {
-            margin-bottom: 10px;
+        #teamName {
+            font-size: 24px;
+            font-weight: bold;
         }
-        select, input, button {
-            padding: 8px;
-            margin: 2px;
-            font-size: 14px;
-            max-width: 100%;
+        .poker-table-container {
+            position: relative;
+            width: 80%; /* Reduced to 80% of the original size */
+            padding-top: 45%; /* Adjusted for 16:9 aspect ratio at 80% size */
+            margin: 0 auto;
         }
-        #votingArea {
-            display: none;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        .poker-table {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
-        
-        .user {
+        #playersArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .player-circle {
             position: absolute;
             width: 60px;
-            text-align: center;
-            font-size: 12px;
-        }
-        
-        .user-card {
-            width: 30px;
-            height: 45px;
-            background-color: #fff;
-            border: 2px solid #000;
-            border-radius: 5px;
-            margin: 0 auto 2px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
-        .voted .user-card {
-            background-color: purple;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4CAF50;
             color: white;
-        }
-        
-       .poker-table-container {
-    position: relative;
-    width: 90%;
-    margin: 0 auto;
-}
-
-.poker-table {
-    width: 100%;
-    height: auto;
-}
-
-.user-circle {
-    position: absolute;
-    top: -22%;
-    left: -15%;
-    width: 120%;
-    height: 120%;
-    pointer-events: none; /* This allows clicks to pass through to elements underneath */
-}
-
-#centerArea {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    pointer-events: auto; /* This allows interaction with Kris and buttons */
-}
-
-#krisAvatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-}
-
-.card-deck {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-        .card {
-            width: 30px;
-            height: 45px;
-            background-color: #fff;
-            border: 2px solid #000;
-            border-radius: 5px;
-            margin: 2px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
+        }
+        #centerArea {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 50%; /* Adjust as needed */
+            height: 50%; /* Adjust as needed */
+        }
+        #krisAvatar {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .card-deck {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
             cursor: pointer;
-            font-size: 12px;
         }
-        .card:hover {
-            background-color: #f0f0f0;
+        .card.selected {
+            border: 2px solid #4CAF50;
         }
-        #adminControls {
-            margin-top: 5px;
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
         }
-        @media (max-width: 600px) {
-            .container {
-                padding: 5px;
-            }
-            #logo {
-                max-height: 10vh;
-            }
-            .user-circle {
-                margin: 5px 0;
-            }
-            .user {
-                width: 50px;
-            }
-           
-            .user-card {
-                width: 25px;
-                height: 35px;
-            }
-            #krisAvatar {
-                width: 40px;
-            }
-            .card {
-                width: 25px;
-                height: 35px;
-                font-size: 10px;
-            }
-            select, input, button {
-                padding: 6px;
-                font-size: 12px;
-            }
-        }
-    
-    /* poker table */
-   
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    #logo {
-        width: auto;
-        height: 70px;
-        object-fit: contain;
-    }
-    #teamName {
-        font-size: 24px;
-        font-weight: bold;
-    }
-    #initialSetup {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
     </style>
 </head>
 <body>
-       <div class="container">
-        <div class="header">
-            <img id="logo" src="krispokerlogo.webp" alt="Kris' Planit Poker">
+    <div class="container">
+        <header>
+            <img src="krispokerlogo.webp" alt="Kris' Planit Poker" id="logo">
             <div id="teamName"></div>
-        </div>
-        <div id="initialSetup">
-            <div id="roomControls">
-                <select id="teamSelect">
-                    <option value="">Select a team</option>
-                    <option value="Adventure Time">Adventure Time</option>
-                    <option value="Moonshots">Moonshots</option>
-                    <option value="Titans">Titans</option>
-                    <option value="Chaos Crushers">Chaos Crushers</option>
-                </select>
-            </div>
-            <div id="nameInput" style="display:none;">
-                <input type="text" id="userName" placeholder="Enter your name">
-                <button onclick="joinTeam()">Join Team</button>
-            </div>
-        </div>
-       <div id="votingArea" style="display:none;">
-    <button id="exitRoom" onclick="exitRoom()" style="display:none;">Exit Room</button>
-    <div class="poker-table-container">
-        <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M750 650H1075V700H750V650Z" fill="#6B6B6B"/>
-            <path d="M375 650H700V700H375V650Z" fill="#6B6B6B"/>
-            <path d="M750 0H1075V50H750V0Z" fill="#6B6B6B"/>
-            <path d="M375 0H700V50H375V0Z" fill="#6B6B6B"/>
-            <path d="M50 350C50 193.027 171.276 64.0533 325 51.28V1.27997C143.68 14.181 0 165.453 0 350C0 534.547 143.68 685.827 325 698.72V648.72C171.28 635.944 50 506.973 50 350Z" fill="#6B6B6B"/>
-            <path d="M1350.07 350C1350.07 212.147 1237.92 100 1100.07 100H350.067C212.213 100 100.067 212.151 100.067 350C100.067 487.849 212.217 600 350.067 600H1100.07C1237.92 600 1350.07 487.849 1350.07 350Z" fill="#6B6B6B"/>
-            <path d="M1125 1.27997V51.28C1278.72 64.056 1400 193.027 1400 350C1400 506.973 1278.72 635.947 1125 648.72V698.72C1306.32 685.819 1450 534.547 1450 350C1450 165.453 1306.32 14.1733 1125 1.27997Z" fill="#6B6B6B"/>
-        </svg>
-        <div id="userCircle" class="user-circle">
-            <div id="centerArea">
-                <img id="krisAvatar" src="krisavatar.webp" alt="Kris">
-                <div>Kris</div>
-                <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
-                <div id="adminControls" style="display:none;">
-                    <button onclick="resetVotes()">Reset Votes</button>
-                    <button onclick="clearUsers()">Clear All Users</button>
+        </header>
+
+        <main>
+            <section id="initialSetup">
+                <div id="roomControls">
+                    <label for="teamSelect">Select a team:</label>
+                    <select id="teamSelect">
+                        <option value="Adventure Time">Adventure Time</option>
+                        <option value="Moonshots">Moonshots</option>
+                        <option value="Titans">Titans</option>
+                        <option value="Chaos Crushers">Chaos Crushers</option>
+                    </select>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="card-deck" id="cardDeck"></div>
-</div>
-    </div>
+                <div id="nameInput" style="display:none;">
+                    <input type="text" id="playerName" placeholder="Enter your name">
+                    <button id="joinTeam">Join Team</button>
+                </div>
+            </section>
 
+            <section id="votingArea" style="display:none;">
+                <button id="exitRoom">Exit Room</button>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+                <div class="poker-table-container">
+                    <svg class="poker-table" viewBox="0 0 1450 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M750 650H1075V700H750V650Z" fill="#6B6B6B"></path>
+                        <path d="M375 650H700V700H375V650Z" fill="#6B6B6B"></path>
+                        <path d="M750 0H1075V50H750V0Z" fill="#6B6B6B"></path>
+                        <path d="M375 0H700V50H375V0Z" fill="#6B6B6B"></path>
+                        <path d="M50 350C50 193.027 171.276 64.0533 325 51.28V1.27997C143.68 14.181 0 165.453 0 350C0 534.547 143.68 685.827 325 698.72V648.72C171.28 635.944 50 506.973 50 350Z" fill="#6B6B6B"></path>
+                        <path d="M1350.07 350C1350.07 212.147 1237.92 100 1100.07 100H350.067C212.213 100 100.067 212.151 100.067 350C100.067 487.849 212.217 600 350.067 600H1100.07C1237.92 600 1350.07 487.849 1350.07 350Z" fill="#6B6B6B"></path>
+                        <path d="M1125 1.27997V51.28C1278.72 64.056 1400 193.027 1400 350C1400 506.973 1278.72 635.947 1125 648.72V698.72C1306.32 685.819 1450 534.547 1450 350C1450 165.453 1306.32 14.1733 1125 1.27997Z" fill="#6B6B6B"></path>
+                    </svg>
+                    
+                    <div id="playersArea">
+                        <!-- Player circles will be dynamically added here -->
+                    </div>
+
+                    <div id="centerArea">
+                        <img src="krisavatar.webp" alt="Kris" id="krisAvatar">
+                        <div id="adminName">Kris</div>
+                        <div id="adminControls" style="display:none;">
+                            <button id="revealCards">Reveal cards</button>
+                            <button id="resetVotes">Reset Votes</button>
+                            <button id="clearAllUsers">Clear All Users</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cardDeck" class="card-deck">
+                    <!-- Card options will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script>
-        
-        // Your Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
-          authDomain: "planningpoker-68a62.firebaseapp.com",
-          projectId: "planningpoker-68a62",
-          storageBucket: "planningpoker-68a62.appspot.com",
-          messagingSenderId: "509722751729",
-          appId: "1:509722751729:web:4f5bfb49b31b6535012f50"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        let currentTeam = '';
-        let currentUser = '';
-        const cards = ['0', '1', '2', '3', '5', '8', '13', '?', '☕'];
+        // Game state
+        let currentPlayer = null;
+        let players = [];
         let isAdmin = false;
-        let votesRevealed = false;
+        let selectedCard = null;
 
-        document.getElementById('teamSelect').addEventListener('change', function() {
-            if (this.value) {
-                document.getElementById('nameInput').style.display = 'block';
-            }
-        });
+        // DOM elements
+        const initialSetup = document.getElementById('initialSetup');
+        const roomControls = document.getElementById('roomControls');
+        const nameInput = document.getElementById('nameInput');
+        const playerNameInput = document.getElementById('playerName');
+        const joinTeamButton = document.getElementById('joinTeam');
+        const teamSelect = document.getElementById('teamSelect');
+        const teamNameDisplay = document.getElementById('teamName');
+        const votingArea = document.getElementById('votingArea');
+        const exitRoomButton = document.getElementById('exitRoom');
+        const playersArea = document.getElementById('playersArea');
+        const cardDeck = document.getElementById('cardDeck');
+        const adminControls = document.getElementById('adminControls');
+        const revealCardsButton = document.getElementById('revealCards');
+        const resetVotesButton = document.getElementById('resetVotes');
+        const clearAllUsersButton = document.getElementById('clearAllUsers');
+
+        // Event listeners
+        teamSelect.addEventListener('change', showNameInput);
+        joinTeamButton.addEventListener('click', joinTeam);
+        exitRoomButton.addEventListener('click', exitRoom);
+        revealCardsButton.addEventListener('click', revealCards);
+        resetVotesButton.addEventListener('click', resetVotes);
+        clearAllUsersButton.addEventListener('click', clearAllUsers);
+
+        // Functions
+        function showNameInput() {
+            roomControls.style.display = 'none';
+            nameInput.style.display = 'block';
+            teamNameDisplay.textContent = teamSelect.value;
+        }
 
         function joinTeam() {
-    currentTeam = document.getElementById('teamSelect').value;
-    currentUser = document.getElementById('userName').value;
-    if (currentTeam && currentUser) {
-        document.getElementById('teamName').textContent = `Team: ${currentTeam}`;
-        document.getElementById('initialSetup').style.display = 'none';
-        document.getElementById('votingArea').style.display = 'block';
-        document.getElementById('exitRoom').style.display = 'block'; // Add this line
-        checkIfAdmin();
-        if (!isAdmin) {
-            renderCardDeck();
-            addUserToTeam();
-        }
-        listenToVotes();
-    } else {
-        alert('Please select a team and enter your name');
-    }
-}
-        
-
-        function checkIfAdmin() {
-            isAdmin = (currentUser.toLowerCase() === 'kris');
-            document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('revealButton').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('cardDeck').style.display = isAdmin ? 'none' : 'flex';
-        }
-
-        function renderCardDeck() {
-            const cardDeck = document.getElementById('cardDeck');
-            cardDeck.innerHTML = ''; // Clear existing cards
-            cards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.textContent = card;
-                cardElement.onclick = () => vote(card);
-                cardDeck.appendChild(cardElement);
-            });
-        }
-
-        function vote(value) {
-            if (!isAdmin) {
-                db.collection('teams').doc(currentTeam).set({
-                    [currentUser]: {vote: value, timestamp: Date.now()}
-                }, { merge: true });
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                currentPlayer = {
+                    name: playerName,
+                    team: teamSelect.value
+                };
+                players.push(currentPlayer);
+                initialSetup.style.display = 'none';
+                votingArea.style.display = 'block';
+                setupGame();
             }
         }
 
-        function addUserToTeam() {
-    db.collection('teams').doc(currentTeam).set({
-        [currentUser]: {vote: null, timestamp: Date.now()}
-    }, { merge: true })
-    .then(() => {
-        // After successfully adding to the database, update the UI
-        updatePlayerPositions();
-    })
-    .catch((error) => {
-        console.error("Error adding user to team: ", error);
-    });
-}
-
-function updatePlayerPositions() {
-    db.collection('teams').doc(currentTeam).get().then((doc) => {
-        if (doc.exists) {
-            const users = doc.data();
-            const userCount = Object.keys(users).length;
-
-            // Clear existing players
-            const userCircle = document.getElementById('userCircle');
-            userCircle.innerHTML = ''; // Clear all children elements
-            
-            // Add players
-            Object.keys(users).forEach((userName, index) => {
-                if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / userCount) * 2 * Math.PI; // Avoid divide by zero
-                    addPlayer(userName, angle);
-                }
-            });
-        }
-    });
-}
-
-
-        function listenToVotes() {
-    db.collection('teams').doc(currentTeam)
-        .onSnapshot((doc) => {
-            if (doc.exists) {
-                const votes = doc.data();
-                updateUserCircle(votes);
-                updatePlayerPositions();  // Add this line
+        function setupGame() {
+            createPlayerCircles();
+            createCardDeck();
+            if (currentPlayer.name.toLowerCase() === 'kris') {
+                isAdmin = true;
+                adminControls.style.display = 'block';
             }
-        });
-}
-
-        function updateUserCircle(votes) {
-    const userCircle = document.getElementById('userCircle');
-    const centerArea = document.getElementById('centerArea');
-    userCircle.innerHTML = ''; // Clear all children elements
-    userCircle.appendChild(centerArea);
-
-    const userCount = Object.keys(votes).length;
-    let index = 0;
-    Object.entries(votes).forEach(([userName, userData]) => {
-        if (userName.toLowerCase() !== 'kris') {
-            const angle = (index / userCount) * 2 * Math.PI;
-            const x = Math.cos(angle) * 42 + 50;
-            const y = Math.sin(angle) * 42 + 50;
-            const userElement = document.createElement('div');
-            userElement.className = 'user' + (userData.vote ? ' voted' : '');
-            userElement.style.left = `${x}%`;
-            userElement.style.top = `${y}%`;
-            userElement.innerHTML = `
-                <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                <div>${userName}</div>
-            `;
-            userCircle.appendChild(userElement);
-            index++;
         }
-    });
-}
 
-
-        function revealVotes() {
-            if (!isAdmin) return;
-            votesRevealed = true;
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    updateUserCircle(doc.data());
+        function createPlayerCircles() {
+            players.forEach((player, index) => {
+                if (player.name.toLowerCase() !== 'kris') {
+                    const circle = document.createElement('div');
+                    circle.className = 'player-circle';
+                    circle.textContent = player.name[0].toUpperCase();
+                    const angle = (index * 2 * Math.PI / (players.length - 1)) - Math.PI / 2;
+                    circle.style.left = `${50 + 45 * Math.cos(angle)}%`;
+                    circle.style.top = `${50 + 45 * Math.sin(angle)}%`;
+                    playersArea.appendChild(circle);
                 }
             });
+        }
+
+        function createCardDeck() {
+            const cards = ['0', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?'];
+            cards.forEach(value => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = value;
+                card.addEventListener('click', () => selectCard(card, value));
+                cardDeck.appendChild(card);
+            });
+        }
+
+        function selectCard(cardElement, value) {
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+            }
+            selectedCard = cardElement;
+            selectedCard.classList.add('selected');
+            // Here you would typically send this selection to the server
+        }
+
+        function exitRoom() {
+            // Reset game state
+            currentPlayer = null;
+            players = [];
+            isAdmin = false;
+            selectedCard = null;
+
+            // Reset UI
+            initialSetup.style.display = 'block';
+            roomControls.style.display = 'block';
+            nameInput.style.display = 'none';
+            votingArea.style.display = 'none';
+            adminControls.style.display = 'none';
+            playerNameInput.value = '';
+            teamSelect.selectedIndex = 0;
+            teamNameDisplay.textContent = '';
+            playersArea.innerHTML = '';
+            cardDeck.innerHTML = '';
+        }
+
+        function revealCards() {
+            if (isAdmin) {
+                // Here you would typically reveal all players' cards
+                console.log('Revealing cards');
+            }
         }
 
         function resetVotes() {
-            if (!isAdmin) return;
-            votesRevealed = false;
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    const users = doc.data();
-                    Object.keys(users).forEach(user => {
-                        users[user].vote = null;
-                    });
-                    return db.collection('teams').doc(currentTeam).set(users);
+            if (isAdmin) {
+                // Reset all votes
+                console.log('Resetting votes');
+                if (selectedCard) {
+                    selectedCard.classList.remove('selected');
+                    selectedCard = null;
                 }
-            }).then(() => {
-                console.log("Votes reset successfully");
-                updateUserCircle({}); // Clear the displayed votes
-            }).catch((error) => {
-                console.error("Error resetting votes: ", error);
-            });
+            }
         }
-function exitRoom() {
-    currentTeam = '';
-    currentUser = '';
-    isAdmin = false;
-    votesRevealed = false;
-    document.getElementById('initialSetup').style.display = 'flex';
-    document.getElementById('votingArea').style.display = 'none';
-    document.getElementById('exitRoom').style.display = 'none';
-    document.getElementById('teamSelect').value = '';
-    document.getElementById('userName').value = '';
-    document.getElementById('teamName').textContent = '';
-    // Unsubscribe from Firestore listeners if any
-    // Reset any other necessary state
-}
-        function clearUsers() {
-            if (!isAdmin) return;
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    const users = { 'kris': { vote: null, timestamp: Date.now() } };
-                    return db.collection('teams').doc(currentTeam).set(users);
-                }
-            }).then(() => {
-                console.log("Users cleared successfully");
-                updateUserCircle({ 'kris': { vote: null, timestamp: Date.now() } });
-            }).catch((error) => {
-                console.error("Error clearing users: ", error);
-            });
+
+        function clearAllUsers() {
+            if (isAdmin) {
+                // Clear all users except admin
+                console.log('Clearing all users');
+                players = players.filter(player => player.name.toLowerCase() === 'kris');
+                playersArea.innerHTML = '';
+                createPlayerCircles();
+            }
         }
     </script>
 </body>
