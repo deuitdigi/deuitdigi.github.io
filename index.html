@@ -3,42 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kris' Planning Poker</title>
+    <title>Kris' Advanced Planning Poker</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        button { margin: 5px; padding: 10px; }
-        select { margin: 5px; padding: 10px; }
-        #results { margin-top: 20px; }
-        .selected { background-color: #4CAF50; color: white; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        #roomControls, #nameInput {
+            margin-bottom: 20px;
+        }
+        select, input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        #votingArea {
+            display: none;
+        }
+        .user-circle {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 20px auto;
+        }
+        .user {
+            position: absolute;
+            width: 80px;
+            text-align: center;
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 5px;
+            font-weight: bold;
+        }
+        .user-card {
+            width: 40px;
+            height: 60px;
+            background-color: #fff;
+            border: 2px solid #000;
+            border-radius: 5px;
+            margin: 0 auto 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .voted .user-card {
+            background-color: purple;
+            color: white;
+        }
+        #revealButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .card-deck {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card {
+            width: 40px;
+            height: 60px;
+            background-color: #fff;
+            border: 2px solid #000;
+            border-radius: 5px;
+            margin: 0 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .card:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
-    <h1>Kris' Planning Poker</h1>
-    <div id="roomControls">
-        <select id="teamSelect">
-            <option value="">Select a team</option>
-            <option value="Adventure Time">Adventure Time</option>
-            <option value="Moonshots">Moonshots</option>
-            <option value="Titans">Titans</option>
-            <option value="Chaos Crushers">Chaos Crushers</option>
-        </select>
-        <button onclick="joinTeam()">Join Team</button>
+    <div class="container">
+        <h1>Kris' Advanced Planning Poker</h1>
+        <div id="roomControls">
+            <select id="teamSelect">
+                <option value="">Select a team</option>
+                <option value="Adventure Time">Adventure Time</option>
+                <option value="Moonshots">Moonshots</option>
+                <option value="Titans">Titans</option>
+                <option value="Chaos Crushers">Chaos Crushers</option>
+            </select>
+        </div>
+        <div id="nameInput" style="display:none;">
+            <input type="text" id="userName" placeholder="Enter your name">
+            <button onclick="joinTeam()">Join Team</button>
+        </div>
+        <div id="votingArea" style="display:none;">
+            <h2>Team: <span id="teamName"></span></h2>
+            <div class="user-circle" id="userCircle">
+                <button id="revealButton" onclick="revealVotes()">Reveal cards</button>
+            </div>
+            <div class="card-deck" id="cardDeck"></div>
+        </div>
     </div>
-    <div id="votingArea" style="display:none;">
-        <h2>Team: <span id="teamName"></span></h2>
-        <div id="cards"></div>
-        <button onclick="revealVotes()">Reveal Votes</button>
-        <button onclick="resetVotes()">Reset</button>
-    </div>
-    <div id="results"></div>
 
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
+        // Your Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDPPRqfm_-k9ffS7VxDB10q1s5dYWJGMdg",
           authDomain: "planningpoker-68a62.firebaseapp.com",
@@ -50,56 +137,56 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Initialize Firestore
         const db = firebase.firestore();
 
         let currentTeam = '';
-        const cards = ['1', '2', '3', '5', '8', '13', '21', '?'];
-        let userId;
+        let currentUser = '';
+        const cards = ['0', '1', '2', '3', '5', '8', '13', '?', '☕'];
+        const users = {};
+
+        document.getElementById('teamSelect').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('nameInput').style.display = 'block';
+            }
+        });
 
         function joinTeam() {
             currentTeam = document.getElementById('teamSelect').value;
-            if (currentTeam) {
+            currentUser = document.getElementById('userName').value;
+            if (currentTeam && currentUser) {
                 document.getElementById('teamName').textContent = currentTeam;
                 document.getElementById('roomControls').style.display = 'none';
+                document.getElementById('nameInput').style.display = 'none';
                 document.getElementById('votingArea').style.display = 'block';
-                renderCards();
+                renderCardDeck();
                 listenToVotes();
-                userId = localStorage.getItem('userId') || Date.now().toString();
-                localStorage.setItem('userId', userId);
+                addUserToTeam();
             } else {
-                alert('Please select a team');
+                alert('Please select a team and enter your name');
             }
         }
 
-        function renderCards() {
-            const cardsDiv = document.getElementById('cards');
-            cardsDiv.innerHTML = '';
+        function renderCardDeck() {
+            const cardDeck = document.getElementById('cardDeck');
             cards.forEach(card => {
-                const button = document.createElement('button');
-                button.textContent = card;
-                button.onclick = () => vote(card);
-                cardsDiv.appendChild(button);
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.textContent = card;
+                cardElement.onclick = () => vote(card);
+                cardDeck.appendChild(cardElement);
             });
         }
 
         function vote(value) {
             db.collection('teams').doc(currentTeam).set({
-                [userId]: value
+                [currentUser]: {vote: value, timestamp: Date.now()}
             }, { merge: true });
-            highlightSelectedCard(value);
         }
 
-        function highlightSelectedCard(selectedValue) {
-            const buttons = document.getElementById('cards').getElementsByTagName('button');
-            for (let button of buttons) {
-                if (button.textContent === selectedValue) {
-                    button.classList.add('selected');
-                } else {
-                    button.classList.remove('selected');
-                }
-            }
+        function addUserToTeam() {
+            db.collection('teams').doc(currentTeam).set({
+                [currentUser]: {vote: null, timestamp: Date.now()}
+            }, { merge: true });
         }
 
         function listenToVotes() {
@@ -107,45 +194,42 @@
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const votes = doc.data();
-                        if (votes[userId]) {
-                            highlightSelectedCard(votes[userId]);
-                        }
+                        updateUserCircle(votes);
                     }
                 });
         }
 
-        function revealVotes() {
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    const votes = doc.data();
-                    const results = document.getElementById('results');
-                    results.innerHTML = '<h3>Votes:</h3>';
-                    if (Object.keys(votes).length === 0) {
-                        results.innerHTML += '<p>No votes yet.</p>';
-                    } else {
-                        for (let [voterId, vote] of Object.entries(votes)) {
-                            results.innerHTML += `<p>User ${voterId.slice(-4)}: ${vote}</p>`;
-                        }
-                    }
-                } else {
-                    console.log("No such document!");
-                }
-            }).catch((error) => {
-                console.log("Error getting document:", error);
+        function updateUserCircle(votes) {
+            const userCircle = document.getElementById('userCircle');
+            userCircle.innerHTML = '<button id="revealButton" onclick="revealVotes()">Reveal cards</button>';
+            const userCount = Object.keys(votes).length;
+            Object.entries(votes).forEach(([userName, userData], index) => {
+                const angle = (index / userCount) * 2 * Math.PI;
+                const x = Math.cos(angle) * 250 + 250;
+                const y = Math.sin(angle) * 250 + 250;
+                const userElement = document.createElement('div');
+                userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                userElement.style.left = `${x}px`;
+                userElement.style.top = `${y}px`;
+                userElement.innerHTML = `
+                    <div class="user-card">${userData.vote || ''}</div>
+                    <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
+                    <div>${userName}</div>
+                `;
+                userCircle.appendChild(userElement);
             });
         }
 
-        function resetVotes() {
-            db.collection('teams').doc(currentTeam).delete().then(() => {
-                document.getElementById('results').innerHTML = '';
-                const buttons = document.getElementById('cards').getElementsByTagName('button');
-                for (let button of buttons) {
-                    button.classList.remove('selected');
-                }
-            }).catch((error) => {
-                console.error("Error removing document: ", error);
+        function revealVotes() {
+            const userElements = document.querySelectorAll('.user');
+            userElements.forEach(user => {
+                const card = user.querySelector('.user-card');
+                card.style.backgroundColor = 'purple';
+                card.style.color = 'white';
             });
         }
+
+        // Reset functionality can be added here if needed
     </script>
 </body>
 </html>
