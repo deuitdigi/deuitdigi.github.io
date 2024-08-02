@@ -50,17 +50,7 @@
             width: 80px;
             text-align: center;
         }
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ddd;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 5px;
-            font-weight: bold;
-        }
+       
         .user-card {
             width: 40px;
             height: 60px;
@@ -123,10 +113,7 @@
             .user {
                 width: 60px;
             }
-            .user-avatar {
-                width: 30px;
-                height: 30px;
-            }
+            
             .user-card {
                 width: 30px;
                 height: 45px;
@@ -286,7 +273,6 @@
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
                         <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
