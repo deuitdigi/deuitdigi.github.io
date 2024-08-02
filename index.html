@@ -54,15 +54,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            height: 100vh; /* Use full viewport height */
+            padding-bottom: 20px; /* Add some padding at the bottom */
         }
-        .user-circle {
-            width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1 / 1;
-            position: relative;
-            border-radius: 50%;
-        }
+        #userCircle {
+    position: relative;
+    width: 100%;
+    max-width: 500px; /* Adjust as needed */
+    aspect-ratio: 1 / 1;
+    margin-bottom: auto; /* Push content to the top */
+}
         .user {
             position: absolute;
             width: 80px;
@@ -95,16 +96,16 @@
             color: white;
         }
         #centerArea {
-             position: absolute;
-    top: 50%;
+    position: absolute;
+    bottom: 10%; /* Adjust as needed */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 80%; /* Adjust as needed */
-    max-width: 200px; /* Adjust as needed */
-        }
+    width: 80%;
+    max-width: 200px;
+}
        #krisAvatar {
     width: 60px;
     height: 60px;
@@ -112,33 +113,31 @@
     margin-bottom: 5px;
 }
 
-#centerArea > div:nth-child(2) {
-    margin-bottom: 10px;
+#centerArea button,
+#adminControls button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
 }
-        #centerArea > button {
-    margin-bottom: 15px;
-}
-        #adminControls {
+
+#adminControls {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    width: 100%;
+    align-items: center;
+    margin-top: 10px;
 }
-
-#adminControls button {
+       #cardDeck {
     width: 100%;
-    padding: 5px;
+    max-width: 500px; /* Match with #userCircle */
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px; /* Space between circle and cards */
 }
-        .card-deck {
-        
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            max-width: 500px;
-
-        }
         .card-deck .card {
             width: 40px;
             height: 70px;
@@ -278,7 +277,7 @@
                 document.getElementById('teamName').textContent = currentTeam;
                 document.getElementById('roomControls').style.display = 'none';
                 document.getElementById('nameInput').style.display = 'none';
-                document.getElementById('votingArea').style.display = 'block';
+                document.getElementById('votingArea').style.display = 'flex';
                 checkIfAdmin();
                 if (!isAdmin) {
                     renderCardDeck();
@@ -292,8 +291,8 @@
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
-            document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('revealButton').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminControls').style.display = isAdmin ? 'flex' : 'none';
+            document.getElementById('revealButton').style.display = isAdmin ? 'flex' : 'none';
             document.getElementById('cardDeck').style.display = isAdmin ? 'none' : 'flex';
         }
 
