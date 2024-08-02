@@ -79,6 +79,18 @@
             font-size: 12px;
             text-align: center;
         }
+        .user-card {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+        }
         .voted .user-avatar {
             background-color: purple;
             color: white;
@@ -221,6 +233,24 @@
             }
         });
 
+<<<<<<< HEAD
+let users = [];
+
+        function showNameInput() {
+            document.getElementById('roomControls').style.display = 'none';
+            document.getElementById('nameInput').style.display = 'block';
+        }
+
+        function joinTeam() {
+            const name = document.getElementById('userName').value;
+            const team = document.getElementById('teamSelect').value;
+            if (name && team) {
+                users.push({ name: name });
+                document.getElementById('nameInput').style.display = 'none';
+                document.getElementById('votingArea').style.display = 'block';
+                document.getElementById('teamName').textContent = team;
+                refreshUserCircle();
+=======
         function joinTeam() {
             currentTeam = document.getElementById('teamSelect').value;
             currentUser = document.getElementById('userName').value;
@@ -237,8 +267,43 @@
                 listenToVotes();
             } else {
                 alert('Please select a team and enter your name');
+>>>>>>> e13f3e2942c180a26eb78b52c5c9cc964f99b078
             }
         }
+
+        function refreshUserCircle() {
+            const userCircle = document.getElementById('userCircle');
+            const centerArea = document.getElementById('centerArea');
+            
+            // Remove existing user cards
+            userCircle.querySelectorAll('.user-card').forEach(el => el.remove());
+
+            // Add user cards around the circle
+            users.forEach((user, index) => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.textContent = user.name;
+
+                const angle = (index / users.length) * 2 * Math.PI;
+                const radius = userCircle.offsetWidth / 2 - 40; // Adjust for card size
+                const left = 50 + Math.cos(angle) * radius;
+                const top = 50 + Math.sin(angle) * radius;
+
+                userCard.style.left = `${left}%`;
+                userCard.style.top = `${top}%`;
+                userCard.style.transform = 'translate(-50%, -50%)';
+
+                userCircle.insertBefore(userCard, centerArea);
+            });
+        }
+
+        function exitRoom() {
+            document.getElementById('votingArea').style.display = 'none';
+            document.getElementById('roomControls').style.display = 'block';
+            document.getElementById('userName').value = '';
+            users = [];
+        }
+
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
