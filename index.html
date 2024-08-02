@@ -130,19 +130,53 @@
             background-color: purple;
             color: white;
         }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #roomControls, #nameInput {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #teamSelect, #userName {
+            padding: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
         @media (max-width: 768px) {
+            .poker-table-container {
+                width: 100%;
+                padding-top: 56.25%; /* 16:9 aspect ratio */
+            }
             .card-deck {
-                flex-direction: row;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: #f0f0f0;
+                padding: 10px;
+                display: flex;
+                justify-content: space-around;
                 flex-wrap: nowrap;
                 overflow-x: auto;
-                justify-content: flex-start;
-                padding-bottom: 10px;
             }
             .card {
                 flex: 0 0 auto;
-                width: 50px;
-                height: 75px;
-                font-size: 16px;
+                width: 40px;
+                height: 60px;
+                font-size: 14px;
+            }
+            .user {
+                width: 40px;
+                height: 60px;
+            }
+            .user-avatar {
+                font-size: 18px;
+            }
+            .user-name {
+                font-size: 10px;
             }
         }
     </style>
@@ -282,12 +316,19 @@
             }, { merge: true });
         }
 
+       
         function listenToVotes() {
             db.collection('teams').doc(currentTeam)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
-                        currentVotes = doc.data();
-                        updateUserCircle(currentVotes);
+                        const data = doc.data();
+                        if (data.clearUsers && !isAdmin) {
+                            exitRoom();
+                            alert("The admin has cleared all users. You've been returned to the team selection.");
+                        } else {
+                            currentVotes = data;
+                            updateUserCircle(currentVotes);
+                        }
                     }
                 });
         }
@@ -298,13 +339,18 @@
             userCircle.innerHTML = '';
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).filter(name => name.toLowerCase() !== 'kris').length;
-            let index = 0;
             
+            // Reset user positions
+            userPositions = {};
+            
+            let index = 0;
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / userCount) * 2 * Math.PI;
                     const x = Math.cos(angle) * 45 + 50;
                     const y = Math.sin(angle) * 45 + 50;
+                    
+                    userPositions[userName] = { x, y };
                     
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
@@ -327,6 +373,7 @@
                 }
             });
         }
+
 
         function vote(value) {
             if (!isAdmin) {
