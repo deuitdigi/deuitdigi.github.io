@@ -14,6 +14,17 @@
             margin: 0;
             background-color: #f0f0f0;
         }
+        @media (max-width: 768px) {
+            .user-circle {
+                max-width: 300px;
+            }
+            
+            .card-deck .card {
+                width: 40px;
+                height: 60px;
+                font-size: 14px;
+            }
+        }
         .container {
             text-align: center;
             width: 100%;
@@ -34,14 +45,18 @@
             max-width: 100%;
         }
         #votingArea {
-            display: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
         .user-circle {
-            position: inherit;
             width: 100%;
-            max-width: 600px;
-            height: 0;
-            padding-bottom: 70%;
+            max-width: 500px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            border: 2px solid #ccc;
+            border-radius: 50%;
         }
         .user {
             position: absolute;
@@ -79,9 +94,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
         #krisAvatar {
             width: 100px;
@@ -89,10 +102,14 @@
             margin-bottom: 10px;
         }
         .card-deck {
+        
             display: flex;
-            justify-content: center;
             flex-wrap: wrap;
-            margin-top: 20px;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+
         }
         .card {
             width: 60px;
