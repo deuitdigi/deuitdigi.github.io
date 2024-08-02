@@ -25,6 +25,12 @@
                 font-size: 14px;
             }
         }
+        @media (max-width: 480px){
+             #logo {
+            max-width: 140px;
+            height: auto;
+            }
+        }
         .container {
             text-align: center;
             width: 100%;
@@ -32,7 +38,7 @@
             padding: 20px;
         }
         #logo {
-            max-width: 70px;
+            max-width: 240px;
             height: auto;
         }
         #roomControls, #nameInput {
@@ -112,8 +118,8 @@
 
         }
         .card-deck .card {
-            width: 60px;
-            height: 90px;
+            width: 40px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -310,23 +316,27 @@
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
             let index = 0;
-            Object.entries(votes).forEach(([userName, userData]) => {
-                if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
-                    const userElement = document.createElement('div');
-                    userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    userElement.style.left = `${x}%`;
-                    userElement.style.top = `${y}%`;
-                    userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div>${userName}</div>
-                    `;
-                    userCircle.appendChild(userElement);
-                    index++;
-                }
-            });
+                // Remove existing user cards
+                userCircle.querySelectorAll('.user-card').forEach(el => el.remove());
+            
+                // Add user cards around the circle
+                users.forEach((user, index) => {
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card';
+                    userCard.textContent = user.name;
+            
+                    const angle = (index / users.length) * 2 * Math.PI;
+                    const radius = (userCircle.offsetWidth / 2) * 0.8; // Reduce radius to 80% of circle radius
+                    const left = 50 + Math.cos(angle) * radius;
+                    const top = 50 + Math.sin(angle) * radius;
+            
+                    userCard.style.position = 'absolute';
+                    userCard.style.left = `${left}%`;
+                    userCard.style.top = `${top}%`;
+                    userCard.style.transform = 'translate(-50%, -50%)'; // Center the card on its position
+            
+                    userCircle.insertBefore(userCard, centerArea);
+                });
         }
 
         function revealVotes() {
