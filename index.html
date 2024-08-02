@@ -258,32 +258,34 @@
     }
 });
 
+
         function joinTeam() {
-    currentTeam = document.getElementById('teamSelect').value;
-    currentUser = document.getElementById('userName').value;
-    if (currentTeam && currentUser) {
-
-
-        // Set URL parameters
-        const url = new URL(window.location);
-        url.searchParams.set('team', currentTeam);
-        url.searchParams.set('user', currentUser);
-        window.history.pushState({}, '', url);
-
-        document.getElementById('teamName').textContent = currentTeam;
-        document.getElementById('roomControls').style.display = 'none';
-        document.getElementById('nameInput').style.display = 'none';
-        document.getElementById('votingArea').style.display = 'block';
-        checkIfAdmin();
-        if (!isAdmin) {
-            renderCardDeck();
-            addUserToTeam();
+            currentTeam = document.getElementById('teamSelect').value;
+            currentUser = document.getElementById('userName').value;
+            if (currentTeam && currentUser) {
+                document.getElementById('teamName').textContent = currentTeam;
+                document.getElementById('roomControls').style.display = 'none';
+                document.getElementById('nameInput').style.display = 'none';
+                document.getElementById('votingArea').style.display = 'block';
+                
+                // Set URL parameters
+                const url = new URL(window.location);
+                url.searchParams.set('team', currentTeam);
+                url.searchParams.set('user', currentUser);
+                window.history.pushState({}, '', url);
+                // Add a small delay to ensure DOM elements are available
+                setTimeout(() => {
+                    checkIfAdmin();
+                    if (!isAdmin) {
+                        renderCardDeck();
+                        addUserToTeam();
+                    }
+                    listenToVotes();
+                }, 100);
+            } else {
+                alert('Please select a team and enter your name');
+            }
         }
-        listenToVotes();
-    } else {
-        alert('Please select a team and enter your name');
-    }
-}
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
@@ -364,35 +366,44 @@
         }
        
         function listenToVotes() {
+            if (!currentTeam) {
+                console.error('No current team set');
+                return;
+            }
             db.collection('teams').doc(currentTeam)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
-                        const data = doc.data();
-                        if (data.clearUsers && !isAdmin) {
-                            exitRoom();
-                            alert("The admin has cleared all users. You've been returned to the team selection.");
+                        const votes = doc.data();
+                        console.log('Team data:', JSON.stringify(votes, null, 2));
+                        if (document.getElementById('userCircle') && document.getElementById('centerArea')) {
+                            updateUserCircle(votes);
                         } else {
-                            currentVotes = data;
-                            updateUserCircle(currentVotes);
+                            console.error('Required elements not found when trying to update user circle');
                         }
+                    } else {
+                        console.log('No team document found for:', currentTeam);
                     }
+                }, (error) => {
+                    console.error("Error getting document:", error);
                 });
         }
 
         function updateUserCircle(votes) {
-            if (!votes || typeof votes !== 'object') {
-                console.error('Invalid votes object:', votes);
-                return;
-            }
+            console.log('Updating user circle with votes:', JSON.stringify(votes, null, 2));
 
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
             
+            if (!userCircle) {
+                console.error('userCircle element not found');
+            }
+            if (!centerArea) {
+                console.error('centerArea element not found');
+            }
             if (!userCircle || !centerArea) {
-                console.error('Required elements not found');
+                console.error('Required elements not found. userCircle:', userCircle, 'centerArea:', centerArea);
                 return;
             }
-
             // Clear existing users (except centerArea)
             while (userCircle.firstChild) {
                 if (userCircle.firstChild !== centerArea) {
@@ -402,27 +413,27 @@
                 }
             }
 
-            const userCount = Object.keys(votes).length;
-            let index = 0;
-            Object.entries(votes).forEach(([userName, userData]) => {
-                if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 42 + 50;
-                    const y = Math.sin(angle) * 42 + 50;
-                    const userElement = document.createElement('div');
-                    userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    userElement.style.position = 'absolute';
-                    userElement.style.left = `${x}%`;
-                    userElement.style.top = `${y}%`;
-                    userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
-                        <div>${userName}</div>
-                    `;
-                    userCircle.appendChild(userElement);
-                    index++;
-                }
-            });
+                const userCount = Object.keys(votes).length;
+                let index = 0;
+                Object.entries(votes).forEach(([userName, userData]) => {
+                    if (userName.toLowerCase() !== 'kris') {
+                        const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                        const x = Math.cos(angle) * 42 + 50;
+                        const y = Math.sin(angle) * 42 + 50;
+                        const userElement = document.createElement('div');
+                        userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                        userElement.style.position = 'absolute';
+                        userElement.style.left = `${x}%`;
+                        userElement.style.top = `${y}%`;
+                        userElement.innerHTML = `
+                            <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                            <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
+                            <div>${userName}</div>
+                        `;
+                        userCircle.appendChild(userElement);
+                        index++;
+                    }
+                });
         }
 
         function vote(value) {
