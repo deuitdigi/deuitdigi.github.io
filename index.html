@@ -95,17 +95,40 @@
             color: white;
         }
         #centerArea {
-            position: absolute;
-            top: 60%;
-            left: 60%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+             position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%; /* Adjust as needed */
+    max-width: 200px; /* Adjust as needed */
         }
-        #krisAvatar {
-            width: 100px;
-            height: auto;
-            margin-bottom: 10px;
-        }
+       #krisAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+}
+
+#centerArea > div:nth-child(2) {
+    margin-bottom: 10px;
+}
+        #centerArea > button {
+    margin-bottom: 15px;
+}
+        #adminControls {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+#adminControls button {
+    width: 100%;
+    padding: 5px;
+}
         .card-deck {
         
             display: flex;
