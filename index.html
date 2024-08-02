@@ -52,32 +52,21 @@
         }
        
         .user-card {
-            width: 60px;
-            height: 90px;
-            background-color: white;
+            width: 40px;
+            height: 60px;
+            background-color: #fff;
             border: 2px solid #000;
             border-radius: 5px;
+            margin: 0 auto 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            font-weight: bold;
         }
-         
+        .voted .user-card {
+            background-color: purple;
+            color: white;
         }
-         .user-card::before {
-            content: "";
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            border: 1px solid #000;
-            border-radius: 3px;
-        }
-       
         #centerArea {
             position: absolute;
             top: 50%;
