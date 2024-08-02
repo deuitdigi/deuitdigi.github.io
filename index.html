@@ -359,45 +359,39 @@
         function updateUserCircle(votes) {
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
-            userCircle.innerHTML = '';
-            userCircle.appendChild(centerArea);
-            const userCount = Object.keys(votes).filter(name => name.toLowerCase() !== 'kris').length;
             
-            // Reset user positions
-            userPositions = {};
-            
+            // Clear existing users (except centerArea)
+            while (userCircle.firstChild) {
+                if (userCircle.firstChild !== centerArea) {
+                    userCircle.removeChild(userCircle.firstChild);
+                } else {
+                    break;
+                }
+            }
+
+            const userCount = Object.keys(votes).length;
             let index = 0;
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / userCount) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
-                    
-                    userPositions[userName] = { x, y };
-                    
+                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                    const x = Math.cos(angle) * 42 + 50;
+                    const y = Math.sin(angle) * 42 + 50;
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    if (userName === currentUser) {
-                        userElement.classList.add('current-user');
-                    }
+                    userElement.style.position = 'absolute';
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
-                        <div class="user-avatar">${votesRevealed ? (userData.vote || '') : ''}</div>
-                        <div class="user-name">${userName}</div>
+                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
+                        <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
-
-                    if (userName === currentUser && userData.vote) {
-                        const userCard = userElement.querySelector('.user-avatar');
-                        userCard.textContent = userData.vote;
-                    }
                     index++;
                 }
             });
         }
-
-
+        
         function vote(value) {
             if (!isAdmin) {
                 db.collection('teams').doc(currentTeam).set({
