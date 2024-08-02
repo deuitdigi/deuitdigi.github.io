@@ -61,7 +61,6 @@
             max-width: 500px;
             aspect-ratio: 1 / 1;
             position: relative;
-            border: 2px solid #ccc;
             border-radius: 50%;
         }
         .user {
@@ -320,12 +319,17 @@
               Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
+                     // Adjust the radius to 40% of the circle's diameter
+                    const radius = 40;
+                    // Use Math.round to ensure pixel-perfect positioning
+                    const x = Math.round(Math.cos(angle) * radius + 50);
+                    const y = Math.round(Math.sin(angle) * radius + 50);
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                     // Use transform to center the user element on its position
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
+                    userElement.style.transform = 'translate(-50%, -50%)';
                     userElement.innerHTML = `
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
                         <div>${userName}</div>
