@@ -287,9 +287,21 @@
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
-            document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('revealButton').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('cardDeck').style.display = isAdmin ? 'none' : 'flex';
+            
+            const adminControls = document.getElementById('adminControls');
+            if (adminControls) {
+                adminControls.style.display = isAdmin ? 'block' : 'none';
+            }
+            
+            const revealButton = document.getElementById('revealButton');
+            if (revealButton) {
+                revealButton.style.display = isAdmin ? 'block' : 'none';
+            }
+            
+            const cardDeck = document.getElementById('cardDeck');
+            if (cardDeck) {
+                cardDeck.style.display = isAdmin ? 'none' : 'flex';
+            }
         }
 
         function renderCardDeck() {
