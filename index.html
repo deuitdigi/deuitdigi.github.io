@@ -67,6 +67,10 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 2px 5px;
+            visibility: hidden;
+        }
+        .user.current-user .user-card {
+            visibility: visible;
         }
         .voted .user-avatar {
             border: 2px solid #4CAF50;
@@ -184,6 +188,7 @@
         const cards = ['0', '1', '2', '3', '5', '8', '13', '?', '☕'];
         let isAdmin = false;
         let votesRevealed = false;
+        let userPositions = {};
 
         document.getElementById('teamSelect').addEventListener('change', function() {
             if (this.value) {
@@ -219,7 +224,7 @@
 
         function renderCardDeck() {
             const cardDeck = document.getElementById('cardDeck');
-            cardDeck.innerHTML = ''; // Clear existing cards
+            cardDeck.innerHTML = '';
             cards.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
@@ -260,22 +265,32 @@
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
             let index = 0;
+            
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
+                    if (!userPositions[userName]) {
+                        const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                        userPositions[userName] = {
+                            x: Math.cos(angle) * 45 + 50,
+                            y: Math.sin(angle) * 45 + 50
+                        };
+                        index++;
+                    }
+                    
+                    const { x, y } = userPositions[userName];
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                    if (userName === currentUser) {
+                        userElement.classList.add('current-user');
+                    }
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                        <div class="user-card">${userData.vote || ''}</div>
                         <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
                         <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
-                    index++;
                 }
             });
         }
@@ -283,10 +298,8 @@
         function revealVotes() {
             if (!isAdmin) return;
             votesRevealed = true;
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    updateUserCircle(doc.data());
-                }
+            document.querySelectorAll('.user-card').forEach(card => {
+                card.style.visibility = 'visible';
             });
         }
 
@@ -303,7 +316,13 @@
                 }
             }).then(() => {
                 console.log("Votes reset successfully");
-                updateUserCircle({}); // Clear the displayed votes
+                document.querySelectorAll('.user-card').forEach(card => {
+                    card.style.visibility = 'hidden';
+                    card.textContent = '';
+                });
+                document.querySelectorAll('.user').forEach(user => {
+                    user.classList.remove('voted');
+                });
             }).catch((error) => {
                 console.error("Error resetting votes: ", error);
             });
@@ -325,13 +344,20 @@
         }
 
         function exitRoom() {
-            // Reset game state
+            if (currentTeam && currentUser) {
+                db.collection('teams').doc(currentTeam).update({
+                    [currentUser]: firebase.firestore.FieldValue.delete()
+                }).catch((error) => {
+                    console.error("Error removing user from team: ", error);
+                });
+            }
+
             currentTeam = '';
             currentUser = '';
             isAdmin = false;
             votesRevealed = false;
+            userPositions = {};
 
-            // Reset UI
             document.getElementById('roomControls').style.display = 'block';
             document.getElementById('nameInput').style.display = 'none';
             document.getElementById('votingArea').style.display = 'none';
@@ -341,15 +367,6 @@
             document.getElementById('teamName').textContent = '';
             document.getElementById('userCircle').innerHTML = '';
             document.getElementById('cardDeck').innerHTML = '';
-
-            // Remove user from the team in Firestore
-            if (currentTeam && currentUser) {
-                db.collection('teams').doc(currentTeam).update({
-                    [currentUser]: firebase.firestore.FieldValue.delete()
-                }).catch((error) => {
-                    console.error("Error removing user from team: ", error);
-                });
-            }
         }
     </script>
 </body>
