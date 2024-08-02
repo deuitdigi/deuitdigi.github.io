@@ -21,9 +21,8 @@
             padding: 20px;
         }
         #logo {
-            max-width: 100%;
+            max-width: 70px;
             height: auto;
-            margin-bottom: 20px;
         }
         #roomControls, #nameInput {
             margin-bottom: 20px;
@@ -31,7 +30,7 @@
         select, input, button {
             padding: 10px;
             margin: 5px;
-            font-size: 16px;
+            font-size: 22px;
             max-width: 100%;
         }
         #votingArea {
@@ -50,17 +49,7 @@
             width: 80px;
             text-align: center;
         }
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ddd;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 5px;
-            font-weight: bold;
-        }
+        
         .user-card {
             width: 60px;
             height: 90px;
@@ -72,6 +61,15 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
+        }
+        .user-card::before {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 1px solid #000;
+            border-radius: 3px;
         }
         .voted .user-card {
             background-color: purple;
