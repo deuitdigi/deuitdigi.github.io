@@ -145,40 +145,6 @@
             font-size: 16px;
             margin-right: 10px;
         }
-        @media (max-width: 768px) {
-            .poker-table-container {
-                width: 100%;
-                padding-top: 56.25%; /* 16:9 aspect ratio */
-            }
-            .card-deck {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background-color: #f0f0f0;
-                padding: 10px;
-                display: flex;
-                justify-content: space-around;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-            }
-            .card {
-                flex: 0 0 auto;
-                width: 40px;
-                height: 60px;
-                font-size: 14px;
-            }
-            .user {
-                width: 40px;
-                height: 60px;
-            }
-            .user-avatar {
-                font-size: 18px;
-            }
-            .user-name {
-                font-size: 10px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -250,58 +216,35 @@
         let currentVotes = {};
 
         document.getElementById('teamSelect').addEventListener('change', function() {
-    const nameInput = document.getElementById('nameInput');
-    if (this.value) {
-        nameInput.style.display = 'block';
-    } else {
-        nameInput.style.display = 'none';
-    }
-});
+            if (this.value) {
+                document.getElementById('nameInput').style.display = 'block';
+            }
+        });
 
         function joinTeam() {
-    currentTeam = document.getElementById('teamSelect').value;
-    currentUser = document.getElementById('userName').value;
-    if (currentTeam && currentUser) {
-
-
-        // Set URL parameters
-        const url = new URL(window.location);
-        url.searchParams.set('team', currentTeam);
-        url.searchParams.set('user', currentUser);
-        window.history.pushState({}, '', url);
-
-        document.getElementById('teamName').textContent = currentTeam;
-        document.getElementById('roomControls').style.display = 'none';
-        document.getElementById('nameInput').style.display = 'none';
-        document.getElementById('votingArea').style.display = 'block';
-        checkIfAdmin();
-        if (!isAdmin) {
-            renderCardDeck();
-            addUserToTeam();
+            currentTeam = document.getElementById('teamSelect').value;
+            currentUser = document.getElementById('userName').value;
+            if (currentTeam && currentUser) {
+                document.getElementById('teamName').textContent = currentTeam;
+                document.getElementById('roomControls').style.display = 'none';
+                document.getElementById('nameInput').style.display = 'none';
+                document.getElementById('votingArea').style.display = 'block';
+                checkIfAdmin();
+                if (!isAdmin) {
+                    renderCardDeck();
+                    addUserToTeam();
+                }
+                listenToVotes();
+            } else {
+                alert('Please select a team and enter your name');
+            }
         }
-        listenToVotes();
-    } else {
-        alert('Please select a team and enter your name');
-    }
-}
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
-            
-            const adminControls = document.getElementById('adminControls');
-            if (adminControls) {
-                adminControls.style.display = isAdmin ? 'block' : 'none';
-            }
-            
-            const revealButton = document.getElementById('revealButton');
-            if (revealButton) {
-                revealButton.style.display = isAdmin ? 'block' : 'none';
-            }
-            
-            const cardDeck = document.getElementById('cardDeck');
-            if (cardDeck) {
-                cardDeck.style.display = isAdmin ? 'none' : 'flex';
-            }
+            document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('revealButton').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('cardDeck').style.display = isAdmin ? 'none' : 'flex';
         }
 
         function renderCardDeck() {
@@ -339,19 +282,12 @@
             }, { merge: true });
         }
 
-       
         function listenToVotes() {
             db.collection('teams').doc(currentTeam)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
-                        const data = doc.data();
-                        if (data.clearUsers && !isAdmin) {
-                            exitRoom();
-                            alert("The admin has cleared all users. You've been returned to the team selection.");
-                        } else {
-                            currentVotes = data;
-                            updateUserCircle(currentVotes);
-                        }
+                        currentVotes = doc.data();
+                        updateUserCircle(currentVotes);
                     }
                 });
         }
@@ -359,132 +295,44 @@
         function updateUserCircle(votes) {
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
-            
-            // Clear existing users (except centerArea)
-            while (userCircle.firstChild) {
-                if (userCircle.firstChild !== centerArea) {
-                    userCircle.removeChild(userCircle.firstChild);
-                } else {
-                    break;
-                }
-            }
-
+            userCircle.innerHTML = '';
+            userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
             let index = 0;
+            
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
-                    const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 42 + 50;
-                    const y = Math.sin(angle) * 42 + 50;
+                    if (!userPositions[userName]) {
+                        const angle = (index / (userCount - 1)) * 2 * Math.PI;
+                        userPositions[userName] = {
+                            x: Math.cos(angle) * 45 + 50,
+                            y: Math.sin(angle) * 45 + 50
+                        };
+                        index++;
+                    }
+                    
+                    const { x, y } = userPositions[userName];
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
-                    userElement.style.position = 'absolute';
+                    if (userName === currentUser) {
+                        userElement.classList.add('current-user');
+                    }
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
-                        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
-                        <div>${userName}</div>
+                        <div class="user-avatar">${votesRevealed ? (userData.vote || '') : ''}</div>
+                        <div class="user-name">${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
-                    index++;
-                }
-            });
-        }
-        
-        function vote(value) {
-            if (!isAdmin) {
-                db.collection('teams').doc(currentTeam).set({
-                    [currentUser]: {vote: value, timestamp: Date.now()}
-                }, { merge: true });
-                
-                // Update the selected card in the UI
-                document.querySelectorAll('.card').forEach(card => {
-                    if (card.textContent === value) {
-                        card.classList.add('selected');
-                    } else {
-                        card.classList.remove('selected');
+
+                    if (userName === currentUser && userData.vote) {
+                        const userCard = userElement.querySelector('.user-avatar');
+                        userCard.textContent = userData.vote;
                     }
-                });
-            }
-        }
-
-        function resetVotes() {
-            if (!isAdmin) return;
-            votesRevealed = false;
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    const users = doc.data();
-                    Object.keys(users).forEach(user => {
-                        users[user].vote = null;
-                    });
-                    return db.collection('teams').doc(currentTeam).set(users);
                 }
-            }).then(() => {
-                console.log("Votes reset successfully");
-                document.querySelectorAll('.user-avatar').forEach(avatar => {
-                    avatar.style.backgroundColor = 'white';
-                    avatar.style.color = 'black';
-                    avatar.textContent = '';
-                });
-                document.querySelectorAll('.user').forEach(user => {
-                    user.classList.remove('voted');
-                });
-                document.querySelectorAll('.card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-            }).catch((error) => {
-                console.error("Error resetting votes: ", error);
             });
         }
 
-        function clearUsers() {
-    if (!isAdmin) return;
-    db.collection('teams').doc(currentTeam).set({
-        clearUsers: Date.now(),
-        'kris': { vote: null, timestamp: Date.now() }
-    }).then(() => {
-        console.log("Users cleared successfully");
-        updateUserCircle({ 'kris': { vote: null, timestamp: Date.now() } });
-    }).catch((error) => {
-        console.error("Error clearing users: ", error);
-    });
-}
-function listenToVotes() {
-    db.collection('teams').doc(currentTeam)
-        .onSnapshot((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.clearUsers && !isAdmin) {
-                    // Force refresh the page for non-admin users
-                    window.location.reload();
-                } else {
-                    currentVotes = data;
-                    updateUserCircle(currentVotes);
-                }
-            }
-        });
-}
-function handlePageLoad() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const team = urlParams.get('team');
-    const user = urlParams.get('user');
-    
-    if (team && user) {
-        currentTeam = team;
-        currentUser = user;
-        document.getElementById('teamName').textContent = currentTeam;
-        document.getElementById('roomControls').style.display = 'none';
-        document.getElementById('nameInput').style.display = 'none';
-        document.getElementById('votingArea').style.display = 'block';
-        checkIfAdmin();
-        if (!isAdmin) {
-            renderCardDeck();
-            addUserToTeam();
-        }
-        listenToVotes();
-    }
-}
         function revealVotes() {
             if (!isAdmin) return;
             votesRevealed = true;
@@ -541,7 +389,7 @@ function handlePageLoad() {
             });
         }
 
-    function exitRoom() {
+        function exitRoom() {
             if (currentTeam && currentUser) {
                 db.collection('teams').doc(currentTeam).update({
                     [currentUser]: firebase.firestore.FieldValue.delete()
@@ -549,14 +397,13 @@ function handlePageLoad() {
                     console.error("Error removing user from team: ", error);
                 });
             }
+
             currentTeam = '';
             currentUser = '';
             isAdmin = false;
             votesRevealed = false;
             userPositions = {};
-
-            // Remove URL parameters
-            window.history.replaceState({}, document.title, window.location.pathname);
+            currentVotes = {};
 
             document.getElementById('roomControls').style.display = 'block';
             document.getElementById('nameInput').style.display = 'none';
@@ -567,22 +414,7 @@ function handlePageLoad() {
             document.getElementById('teamName').textContent = '';
             document.getElementById('userCircle').innerHTML = '';
             document.getElementById('cardDeck').innerHTML = '';
-    }
-    function resetUI() {
-        document.getElementById('roomControls').style.display = 'block';
-        document.getElementById('nameInput').style.display = 'none';
-        document.getElementById('votingArea').style.display = 'none';
-        document.getElementById('adminControls').style.display = 'none';
-        document.getElementById('userName').value = '';
-        document.getElementById('teamSelect').selectedIndex = 0;
-        document.getElementById('teamName').textContent = '';
-        document.getElementById('userCircle').innerHTML = '';
-        document.getElementById('cardDeck').innerHTML = '';
-    }
-
-    // Call this when the page loads
-    window.onload = resetUI;
-    
+        }
     </script>
 </body>
 </html>
