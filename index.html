@@ -55,7 +55,6 @@
             max-width: 500px;
             aspect-ratio: 1 / 1;
             position: relative;
-            border: 2px solid #ccc;
             border-radius: 50%;
         }
         .user {
@@ -65,17 +64,17 @@
         }
         
         .user-card {
-            width: 60px;
-            height: 90px;
-            background-color: #fff;
-            border: 2px solid #000;
-            border-radius: 5px;
-            margin: 0 auto 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
+                width: 60px;
+                height: 80px;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 14px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
         .user-card::before {
             position: absolute;
             top: 5px;
@@ -313,12 +312,17 @@
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                    const x = Math.cos(angle) * 45 + 50;
-                    const y = Math.sin(angle) * 45 + 50;
+                     // Adjust the radius to 40% of the circle's diameter
+                    const radius = 30;
+                    // Use Math.round to ensure pixel-perfect positioning
+                    const x = Math.round(Math.cos(angle) * radius + 50);
+                    const y = Math.round(Math.sin(angle) * radius + 50);
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                     // Use transform to center the user element on its position
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
+                    userElement.style.transform = 'translate(-50%, -50%)';
                     userElement.innerHTML = `
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
                         <div>${userName}</div>
