@@ -334,11 +334,34 @@
         }
 
         function addUserToTeam() {
+            if (!currentTeam || !currentUser) {
+                console.error('Current team or user is not set');
+                return;
+            }
             db.collection('teams').doc(currentTeam).set({
                 [currentUser]: {vote: null, timestamp: Date.now()}
-            }, { merge: true });
+            }, { merge: true })
+            .then(() => {
+                console.log(`User ${currentUser} added to team ${currentTeam}`);
+                updatePlayerPositions();
+            })
+            .catch((error) => {
+                console.error("Error adding user to team: ", error);
+            });
         }
-
+        function updatePlayerPositions() {
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = doc.data();
+                    console.log('Updating player positions with data:', JSON.stringify(users, null, 2));
+                    updateUserCircle(users);
+                } else {
+                    console.log('No team document found for updating positions');
+                }
+            }).catch((error) => {
+                console.error("Error getting team data: ", error);
+            });
+        }
        
         function listenToVotes() {
             db.collection('teams').doc(currentTeam)
@@ -357,9 +380,19 @@
         }
 
         function updateUserCircle(votes) {
+            if (!votes || typeof votes !== 'object') {
+                console.error('Invalid votes object:', votes);
+                return;
+            }
+
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
             
+            if (!userCircle || !centerArea) {
+                console.error('Required elements not found');
+                return;
+            }
+
             // Clear existing users (except centerArea)
             while (userCircle.firstChild) {
                 if (userCircle.firstChild !== centerArea) {
@@ -391,7 +424,7 @@
                 }
             });
         }
-        
+
         function vote(value) {
             if (!isAdmin) {
                 db.collection('teams').doc(currentTeam).set({
@@ -454,15 +487,14 @@ function listenToVotes() {
     db.collection('teams').doc(currentTeam)
         .onSnapshot((doc) => {
             if (doc.exists) {
-                const data = doc.data();
-                if (data.clearUsers && !isAdmin) {
-                    // Force refresh the page for non-admin users
-                    window.location.reload();
-                } else {
-                    currentVotes = data;
-                    updateUserCircle(currentVotes);
-                }
+                const votes = doc.data();
+                console.log('Team data:', JSON.stringify(votes, null, 2));
+                updateUserCircle(votes);
+            } else {
+                console.log('No team document found for:', currentTeam);
             }
+        }, (error) => {
+            console.error("Error getting document:", error);
         });
 }
 function handlePageLoad() {
