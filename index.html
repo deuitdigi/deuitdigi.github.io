@@ -257,35 +257,37 @@
         nameInput.style.display = 'none';
     }
 });
+function areRequiredElementsPresent() {
+    const userCircle = document.getElementById('userCircle');
+    const centerArea = document.getElementById('centerArea');
+    return userCircle && centerArea;
+}
 
-
-        function joinTeam() {
-            currentTeam = document.getElementById('teamSelect').value;
-            currentUser = document.getElementById('userName').value;
-            if (currentTeam && currentUser) {
-                document.getElementById('teamName').textContent = currentTeam;
-                document.getElementById('roomControls').style.display = 'none';
-                document.getElementById('nameInput').style.display = 'none';
-                document.getElementById('votingArea').style.display = 'block';
-                
-                // Set URL parameters
-                const url = new URL(window.location);
-                url.searchParams.set('team', currentTeam);
-                url.searchParams.set('user', currentUser);
-                window.history.pushState({}, '', url);
-                // Add a small delay to ensure DOM elements are available
-                setTimeout(() => {
-                    checkIfAdmin();
-                    if (!isAdmin) {
-                        renderCardDeck();
-                        addUserToTeam();
-                    }
-                    listenToVotes();
-                }, 100);
-            } else {
-                alert('Please select a team and enter your name');
+function joinTeam() {
+    currentTeam = document.getElementById('teamSelect').value;
+    currentUser = document.getElementById('userName').value;
+    if (currentTeam && currentUser) {
+        document.getElementById('teamName').textContent = currentTeam;
+        document.getElementById('roomControls').style.display = 'none';
+        document.getElementById('nameInput').style.display = 'none';
+        document.getElementById('votingArea').style.display = 'block';
+        
+        // Wait for the voting area to be visible and elements to be present
+        const checkInterval = setInterval(() => {
+            if (areRequiredElementsPresent()) {
+                clearInterval(checkInterval);
+                checkIfAdmin();
+                if (!isAdmin) {
+                    renderCardDeck();
+                    addUserToTeam();
+                }
+                listenToVotes();
             }
-        }
+        }, 100);
+    } else {
+        alert('Please select a team and enter your name');
+    }
+}
 
         function checkIfAdmin() {
             isAdmin = (currentUser.toLowerCase() === 'kris');
@@ -352,19 +354,25 @@
             });
         }
         function updatePlayerPositions() {
-            db.collection('teams').doc(currentTeam).get().then((doc) => {
-                if (doc.exists) {
-                    const users = doc.data();
-                    console.log('Updating player positions with data:', JSON.stringify(users, null, 2));
-                    updateUserCircle(users);
-                } else {
-                    console.log('No team document found for updating positions');
-                }
-            }).catch((error) => {
-                console.error("Error getting team data: ", error);
-            });
+    if (!areRequiredElementsPresent()) {
+        console.error('Required elements not found for updating positions. Retrying in 100ms...');
+        setTimeout(updatePlayerPositions, 100);
+        return;
+    }
+
+    db.collection('teams').doc(currentTeam).get().then((doc) => {
+        if (doc.exists) {
+            const users = doc.data();
+            console.log('Updating player positions with data:', JSON.stringify(users, null, 2));
+            updateUserCircle(users);
+        } else {
+            console.log('No team document found for updating positions');
         }
-       
+    }).catch((error) => {
+        console.error("Error getting team data: ", error);
+    });
+}
+        
         function listenToVotes() {
             if (!currentTeam) {
                 console.error('No current team set');
@@ -389,29 +397,26 @@
         }
 
         function updateUserCircle(votes) {
-            console.log('Updating user circle with votes:', JSON.stringify(votes, null, 2));
+                console.log('Updating user circle with votes:', JSON.stringify(votes, null, 2));
 
-            const userCircle = document.getElementById('userCircle');
-            const centerArea = document.getElementById('centerArea');
-            
-            if (!userCircle) {
-                console.error('userCircle element not found');
-            }
-            if (!centerArea) {
-                console.error('centerArea element not found');
-            }
-            if (!userCircle || !centerArea) {
-                console.error('Required elements not found. userCircle:', userCircle, 'centerArea:', centerArea);
-                return;
-            }
-            // Clear existing users (except centerArea)
-            while (userCircle.firstChild) {
-                if (userCircle.firstChild !== centerArea) {
-                    userCircle.removeChild(userCircle.firstChild);
-                } else {
-                    break;
+                if (!areRequiredElementsPresent()) {
+                    console.error('Required elements not found. Retrying in 100ms...');
+                    setTimeout(() => updateUserCircle(votes), 100);
+                    return;
                 }
-            }
+
+                const userCircle = document.getElementById('userCircle');
+                const centerArea = document.getElementById('centerArea');
+
+                // Clear existing users (except centerArea)
+                while (userCircle.firstChild) {
+                    if (userCircle.firstChild !== centerArea) {
+                        userCircle.removeChild(userCircle.firstChild);
+                    } else {
+                        break;
+                    }
+                }
+
 
                 const userCount = Object.keys(votes).length;
                 let index = 0;
@@ -495,6 +500,10 @@
     });
 }
 function listenToVotes() {
+    if (!currentTeam) {
+        console.error('No current team set');
+        return;
+    }
     db.collection('teams').doc(currentTeam)
         .onSnapshot((doc) => {
             if (doc.exists) {
