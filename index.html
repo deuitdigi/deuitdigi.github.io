@@ -250,15 +250,20 @@
         let currentVotes = {};
 
         document.getElementById('teamSelect').addEventListener('change', function() {
-            if (this.value) {
-                document.getElementById('nameInput').style.display = 'block';
-            }
-        });
+    const nameInput = document.getElementById('nameInput');
+    if (this.value) {
+        nameInput.style.display = 'block';
+    } else {
+        nameInput.style.display = 'none';
+    }
+});
 
         function joinTeam() {
     currentTeam = document.getElementById('teamSelect').value;
     currentUser = document.getElementById('userName').value;
     if (currentTeam && currentUser) {
+
+
         // Set URL parameters
         const url = new URL(window.location);
         url.searchParams.set('team', currentTeam);
@@ -530,81 +535,22 @@ function handlePageLoad() {
             });
         }
 
-        function exitRoom() {
-    if (currentTeam && currentUser) {
-        db.collection('teams').doc(currentTeam).update({
-            [currentUser]: firebase.firestore.FieldValue.delete()
-        }).catch((error) => {
-            console.error("Error removing user from team: ", error);
-        });
-    }
-
-    currentTeam = '';
-    currentUser = '';
-    isAdmin = false;
-    votesRevealed = false;
-    userPositions = {};
-
-    // Remove URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    document.getElementById('roomControls').style.display = 'block';
-    document.getElementById('nameInput').style.display = 'none';
-    document.getElementById('votingArea').style.display = 'none';
-    document.getElementById('adminControls').style.display = 'none';
-    document.getElementById('userName').value = '';
-    document.getElementById('teamSelect').selectedIndex = 0;
-    document.getElementById('teamName').textContent = '';
-    document.getElementById('userCircle').innerHTML = '';
-    document.getElementById('cardDeck').innerHTML = '';
-}
-
-    currentTeam = '';
-    currentUser = '';
-    isAdmin = false;
-    votesRevealed = false;
-    userPositions = {};
-
-    // Remove URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    document.getElementById('roomControls').style.display = 'block';
-    document.getElementById('nameInput').style.display = 'none';
-    document.getElementById('votingArea').style.display = 'none';
-    document.getElementById('adminControls').style.display = 'none';
-    document.getElementById('userName').value = '';
-    document.getElementById('teamSelect').selectedIndex = 0;
-    document.getElementById('teamName').textContent = '';
-    document.getElementById('userCircle').innerHTML = '';
-    document.getElementById('cardDeck').innerHTML = '';
-}
-
-    currentTeam = '';
-    currentUser = '';
-    isAdmin = false;
-    votesRevealed = false;
-    userPositions = {};
-
-    // Remove URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    document.getElementById('roomControls').style.display = 'block';
-    document.getElementById('nameInput').style.display = 'none';
-    document.getElementById('votingArea').style.display = 'none';
-    document.getElementById('adminControls').style.display = 'none';
-    document.getElementById('userName').value = '';
-    document.getElementById('teamSelect').selectedIndex = 0;
-    document.getElementById('teamName').textContent = '';
-    document.getElementById('userCircle').innerHTML = '';
-    document.getElementById('cardDeck').innerHTML = '';
-}
-
+    function exitRoom() {
+            if (currentTeam && currentUser) {
+                db.collection('teams').doc(currentTeam).update({
+                    [currentUser]: firebase.firestore.FieldValue.delete()
+                }).catch((error) => {
+                    console.error("Error removing user from team: ", error);
+                });
+            }
             currentTeam = '';
             currentUser = '';
             isAdmin = false;
             votesRevealed = false;
             userPositions = {};
-            currentVotes = {};
+
+            // Remove URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
 
             document.getElementById('roomControls').style.display = 'block';
             document.getElementById('nameInput').style.display = 'none';
@@ -615,8 +561,22 @@ function handlePageLoad() {
             document.getElementById('teamName').textContent = '';
             document.getElementById('userCircle').innerHTML = '';
             document.getElementById('cardDeck').innerHTML = '';
-        }
-        window.onload = handlePageLoad;
+    }
+    function resetUI() {
+        document.getElementById('roomControls').style.display = 'block';
+        document.getElementById('nameInput').style.display = 'none';
+        document.getElementById('votingArea').style.display = 'none';
+        document.getElementById('adminControls').style.display = 'none';
+        document.getElementById('userName').value = '';
+        document.getElementById('teamSelect').selectedIndex = 0;
+        document.getElementById('teamName').textContent = '';
+        document.getElementById('userCircle').innerHTML = '';
+        document.getElementById('cardDeck').innerHTML = '';
+    }
+
+    // Call this when the page loads
+    window.onload = resetUI;
+    
     </script>
 </body>
 </html>
