@@ -130,20 +130,20 @@
             background-color: purple;
             color: white;
         }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #roomControls, #nameInput {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #teamSelect, #userName {
-            padding: 5px;
-            font-size: 16px;
-            margin-right: 10px;
+        @media (max-width: 768px) {
+            .card-deck {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-bottom: 10px;
+            }
+            .card {
+                flex: 0 0 auto;
+                width: 50px;
+                height: 75px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -297,21 +297,15 @@
             const centerArea = document.getElementById('centerArea');
             userCircle.innerHTML = '';
             userCircle.appendChild(centerArea);
-            const userCount = Object.keys(votes).length;
+            const userCount = Object.keys(votes).filter(name => name.toLowerCase() !== 'kris').length;
             let index = 0;
             
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
-                    if (!userPositions[userName]) {
-                        const angle = (index / (userCount - 1)) * 2 * Math.PI;
-                        userPositions[userName] = {
-                            x: Math.cos(angle) * 45 + 50,
-                            y: Math.sin(angle) * 45 + 50
-                        };
-                        index++;
-                    }
+                    const angle = (index / userCount) * 2 * Math.PI;
+                    const x = Math.cos(angle) * 45 + 50;
+                    const y = Math.sin(angle) * 45 + 50;
                     
-                    const { x, y } = userPositions[userName];
                     const userElement = document.createElement('div');
                     userElement.className = 'user' + (userData.vote ? ' voted' : '');
                     if (userName === currentUser) {
@@ -329,10 +323,92 @@
                         const userCard = userElement.querySelector('.user-avatar');
                         userCard.textContent = userData.vote;
                     }
+                    index++;
                 }
             });
         }
 
+        function vote(value) {
+            if (!isAdmin) {
+                db.collection('teams').doc(currentTeam).set({
+                    [currentUser]: {vote: value, timestamp: Date.now()}
+                }, { merge: true });
+                
+                // Update the selected card in the UI
+                document.querySelectorAll('.card').forEach(card => {
+                    if (card.textContent === value) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                });
+            }
+        }
+
+        function resetVotes() {
+            if (!isAdmin) return;
+            votesRevealed = false;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = doc.data();
+                    Object.keys(users).forEach(user => {
+                        users[user].vote = null;
+                    });
+                    return db.collection('teams').doc(currentTeam).set(users);
+                }
+            }).then(() => {
+                console.log("Votes reset successfully");
+                document.querySelectorAll('.user-avatar').forEach(avatar => {
+                    avatar.style.backgroundColor = 'white';
+                    avatar.style.color = 'black';
+                    avatar.textContent = '';
+                });
+                document.querySelectorAll('.user').forEach(user => {
+                    user.classList.remove('voted');
+                });
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+            }).catch((error) => {
+                console.error("Error resetting votes: ", error);
+            });
+        }
+
+        function clearUsers() {
+            if (!isAdmin) return;
+            db.collection('teams').doc(currentTeam).get().then((doc) => {
+                if (doc.exists) {
+                    const users = { 'kris': { vote: null, timestamp: Date.now() } };
+                    return db.collection('teams').doc(currentTeam).set(users);
+                }
+            }).then(() => {
+                console.log("Users cleared successfully");
+                updateUserCircle({ 'kris': { vote: null, timestamp: Date.now() } });
+                
+                // Notify all connected clients to exit the room
+                db.collection('teams').doc(currentTeam).set({
+                    clearUsers: Date.now()
+                }, { merge: true });
+            }).catch((error) => {
+                console.error("Error clearing users: ", error);
+            });
+        }
+
+        function listenToVotes() {
+            db.collection('teams').doc(currentTeam)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.clearUsers && !isAdmin) {
+                            exitRoom();
+                            alert("The admin has cleared all users. You've been returned to the team selection.");
+                        } else {
+                            currentVotes = data;
+                            updateUserCircle(currentVotes);
+                        }
+                    }
+                });
+        }
         function revealVotes() {
             if (!isAdmin) return;
             votesRevealed = true;
