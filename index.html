@@ -25,12 +25,6 @@
                 font-size: 14px;
             }
         }
-        @media (max-width: 480px){
-             #logo {
-            max-width: 140px;
-            height: auto;
-            }
-        }
         .container {
             text-align: center;
             width: 100%;
@@ -38,7 +32,7 @@
             padding: 20px;
         }
         #logo {
-            max-width: 240px;
+            max-width: 70px;
             height: auto;
         }
         #roomControls, #nameInput {
@@ -118,8 +112,8 @@
 
         }
         .card-deck .card {
-            width: 40px;
-            height: 70px;
+            width: 60px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -316,8 +310,7 @@
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
             let index = 0;
-    
-              Object.entries(votes).forEach(([userName, userData]) => {
+            Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
                     const x = Math.cos(angle) * 45 + 50;
