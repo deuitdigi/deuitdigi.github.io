@@ -43,45 +43,37 @@
         .user {
             position: absolute;
             width: 60px;
-            height: 90px;
+            height: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: center;
         }
         .user-avatar {
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            border: 2px solid #000;
-            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 24px;
-            color: #000;
-            position: relative;
-            overflow: hidden;
         }
-        .user-avatar::before {
-            content: "";
+        .user-card {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            border: 1px solid #000;
-            border-radius: 3px;
+            top: -20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 2px 5px;
+            visibility: hidden;
         }
-        .user-name {
-            margin-top: 5px;
-            font-size: 12px;
-            text-align: center;
+        .user.current-user .user-card {
+            visibility: visible;
         }
         .voted .user-avatar {
-            background-color: purple;
-            color: white;
+            border: 2px solid #4CAF50;
         }
         #centerArea {
             position: absolute;
@@ -106,29 +98,13 @@
             width: 60px;
             height: 90px;
             background-color: white;
-            border: 2px solid #000;
+            border: 1px solid #ccc;
             border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 18px;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            border: 1px solid #000;
-            border-radius: 3px;
-        }
-        .card.selected {
-            background-color: purple;
-            color: white;
         }
         button {
             padding: 10px 20px;
@@ -247,7 +223,6 @@
         let isAdmin = false;
         let votesRevealed = false;
         let userPositions = {};
-        let currentVotes = {};
 
         document.getElementById('teamSelect').addEventListener('change', function() {
     const nameInput = document.getElementById('nameInput');
@@ -321,15 +296,6 @@
                 db.collection('teams').doc(currentTeam).set({
                     [currentUser]: {vote: value, timestamp: Date.now()}
                 }, { merge: true });
-                
-                // Update the selected card in the UI
-                document.querySelectorAll('.card').forEach(card => {
-                    if (card.textContent === value) {
-                        card.classList.add('selected');
-                    } else {
-                        card.classList.remove('selected');
-                    }
-                });
             }
         }
 
@@ -344,6 +310,7 @@
             db.collection('teams').doc(currentTeam)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
+<<<<<<< HEAD
                         const data = doc.data();
                         if (data.clearUsers && !isAdmin) {
                             exitRoom();
@@ -352,6 +319,10 @@
                             currentVotes = data;
                             updateUserCircle(currentVotes);
                         }
+=======
+                        const votes = doc.data();
+                        updateUserCircle(votes);
+>>>>>>> parent of f38efa1 (Update index.html)
                     }
                 });
         }
@@ -382,12 +353,19 @@
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
                     userElement.innerHTML = `
+<<<<<<< HEAD
                         <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+=======
+                        <div class="user-card">${userData.vote || ''}</div>
+>>>>>>> parent of f38efa1 (Update index.html)
                         <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
                         <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
+<<<<<<< HEAD
                     index++;
+=======
+>>>>>>> parent of f38efa1 (Update index.html)
                 }
             });
         }
@@ -488,13 +466,9 @@ function handlePageLoad() {
         function revealVotes() {
             if (!isAdmin) return;
             votesRevealed = true;
-            document.querySelectorAll('.user-avatar').forEach(avatar => {
-                if (avatar.parentElement.classList.contains('voted')) {
-                    avatar.style.backgroundColor = 'purple';
-                    avatar.style.color = 'white';
-                }
+            document.querySelectorAll('.user-card').forEach(card => {
+                card.style.visibility = 'visible';
             });
-            updateUserCircle(currentVotes);
         }
 
         function resetVotes() {
@@ -510,16 +484,12 @@ function handlePageLoad() {
                 }
             }).then(() => {
                 console.log("Votes reset successfully");
-                document.querySelectorAll('.user-avatar').forEach(avatar => {
-                    avatar.style.backgroundColor = 'white';
-                    avatar.style.color = 'black';
-                    avatar.textContent = '';
+                document.querySelectorAll('.user-card').forEach(card => {
+                    card.style.visibility = 'hidden';
+                    card.textContent = '';
                 });
                 document.querySelectorAll('.user').forEach(user => {
                     user.classList.remove('voted');
-                });
-                document.querySelectorAll('.card').forEach(card => {
-                    card.classList.remove('selected');
                 });
             }).catch((error) => {
                 console.error("Error resetting votes: ", error);
@@ -554,9 +524,12 @@ function handlePageLoad() {
             isAdmin = false;
             votesRevealed = false;
             userPositions = {};
+<<<<<<< HEAD
 
             // Remove URL parameters
             window.history.replaceState({}, document.title, window.location.pathname);
+=======
+>>>>>>> parent of f38efa1 (Update index.html)
 
             document.getElementById('roomControls').style.display = 'block';
             document.getElementById('nameInput').style.display = 'none';
