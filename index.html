@@ -328,7 +328,20 @@
                 }
                 console.log("User:", currentUser, "Vote:", value);
                 console.log("Current team:", currentTeam);
-                
+                // Update the UI to show the selected card
+                    document.querySelectorAll('#cardDeck .card').forEach(card => {
+                        card.classList.remove('selected');
+                        if (card.getAttribute('data-value') === value) {
+                            card.classList.add('selected');
+                        }
+                    });
+            
+                    // Update the user's card in the circle
+                    const userCard = document.querySelector(`.user-card[data-user="${currentUser}"]`);
+                    if (userCard) {
+                        userCard.textContent = value;
+                        userCard.classList.add('voted');
+                    }
                 db.collection('teams').doc(currentTeam).set({
                     [currentUser]: {vote: value, timestamp: Date.now()}
                 }, { merge: true }).then(() => {
@@ -389,8 +402,11 @@
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
                     userElement.style.transform = 'translate(-50%, -50%)';
+                    const voteValue = userName === currentUser ? userData.vote : '';
+                    const votedClass = userData.vote ? 'voted' : '';
+                    
                     userElement.innerHTML = `
-                        <div class="user-card">${votesRevealed && userData.vote ? userData.vote : ''}</div>
+                        <div class="user-card ${votedClass}" data-user="${userName}">${voteValue}</div>
                         <div>${userName}</div>
                     `;
                     userCircle.appendChild(userElement);
