@@ -29,7 +29,7 @@
             #cardDeck{
                 gap:5pxl;
             }
-            .card-deck .card {
+            #card-deck .card {
                 width:35px;
             }
             #logo {
@@ -138,18 +138,24 @@
     margin-top: 20px; /* Space between circle and cards */
            margin-bottom:auto;
 }
-        .card-deck .card {
-            width: 40px;
-            height: 70px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
+        #card-deck .card {
+            flex: 0 0 auto;
+        width: 60px;
+        height: 90px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5em;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
         }
        
+    #cardDeck .card:hover {
+        background-color: #e0e0e0;
+    }
        
         @media (max-width: 600px) {
             .user-circle {
@@ -173,11 +179,7 @@
                 width: 140px;
                 height: auto;
             }
-            .card {
-                width: 30px;
-                height: 45px;
-                font-size: 12px;
-            }
+            
         }
     </style>
 </head>
