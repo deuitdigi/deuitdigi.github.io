@@ -414,22 +414,23 @@
                 }
             });
         }
-
         function revealVotes() {
             if (!isAdmin) return;
-            console.log("revealVotes function called");
-            console.log("isAdmin:", isAdmin);
             votesRevealed = true;
-            console.log("votesRevealed set to:", votesRevealed);
             db.collection('teams').doc(currentTeam).get().then((doc) => {
                 if (doc.exists) {
-                    console.log("Team data:", doc.data());
-                    updateUserCircle(doc.data());
-                } else {
-                    console.log("No team data found");
+                    const votes = doc.data();
+                    Object.entries(votes).forEach(([userName, userData]) => {
+                        const userCard = document.querySelector(`.user-card[data-user="${userName}"]`);
+                        if (userCard && userData.vote) {
+                            userCard.textContent = userData.vote;
+                            userCard.classList.add('voted');
+                        }
+                    });
                 }
             });
         }
+       
 
         function resetVotes() {
             if (!isAdmin) return;
