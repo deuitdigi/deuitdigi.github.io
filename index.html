@@ -236,7 +236,7 @@
                 <div id="centerArea">
                     <img id="krisAvatar" src="krisavatar.webp" alt="Kris">
                     <div>Kris</div>
-                    <button id="revealButton" onclick="revealVotes()" style="display:none;">Reveal cards</button>
+                    <button id="revealButton" onclick="revealVotes()"> Reveal cards</button>
                     <div id="adminControls" style="display:none;">
                         <button onclick="resetVotes()">Reset Votes</button>
                         <button onclick="clearUsers()">Clear All Users</button>
@@ -277,7 +277,17 @@
                 document.getElementById('nameInput').style.display = 'block';
             }
         });
-
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const revealButton = document.getElementById('revealButton');
+            if (revealButton) {
+                revealButton.addEventListener('click', () => {
+                    console.log("Reveal button clicked");
+                    revealVotes();
+                });
+            } else {
+                console.log("Reveal button not found");
+            }
+        });
         function joinTeam() {
             currentTeam = document.getElementById('teamSelect').value;
             currentUser = document.getElementById('userName').value;
@@ -318,9 +328,15 @@
 
         function vote(value) {
             if (!isAdmin) {
+                console.log("vote function called");
+                console.log("User:", currentUser, "Vote:", value);
                 db.collection('teams').doc(currentTeam).set({
                     [currentUser]: {vote: value, timestamp: Date.now()}
-                }, { merge: true });
+                }, { merge: true }).then(() => {
+                    console.log("Vote saved successfully");
+                }).catch((error) => {
+                    console.error("Error saving vote:", error);
+                });
             }
         }
 
@@ -343,6 +359,8 @@
         function updateUserCircle(votes) {
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
+            console.log("updateUserCircle called with votes:", votes);
+            console.log("votesRevealed:", votesRevealed);
             userCircle.innerHTML = '';
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
@@ -374,10 +392,16 @@
 
         function revealVotes() {
             if (!isAdmin) return;
+            console.log("revealVotes function called");
+            console.log("isAdmin:", isAdmin);
             votesRevealed = true;
+            console.log("votesRevealed set to:", votesRevealed);
             db.collection('teams').doc(currentTeam).get().then((doc) => {
                 if (doc.exists) {
+                    console.log("Team data:", doc.data());
                     updateUserCircle(doc.data());
+                } else {
+                    console.log("No team data found");
                 }
             });
         }
