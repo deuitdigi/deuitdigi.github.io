@@ -325,26 +325,27 @@
                     cardElement.textContent = card;
                     cardElement.setAttribute('data-value', card);
                     cardElement.setAttribute('data-index', index);
+                    cardElement.addEventListener('click', cardClickHandler);
                     console.log(`Creating card: ${card}, index: ${index}`);
                     cardDeck.appendChild(cardElement);
                 });
              cardDeck.addEventListener('click', cardClickHandler);
         }
        function cardClickHandler(event) {
-            if (event.target.classList.contains('card')) {
-                const clickedValue = event.target.getAttribute('data-value');
-                const clickedIndex = event.target.getAttribute('data-index');
-                const clickedText = event.target.textContent;
-                console.log('Clicked card details:', {
-                    value: clickedValue,
-                    index: clickedIndex,
-                    text: clickedText,
-                    element: event.target
-                });
-                vote(clickedValue);
-            }
+            const clickedValue = event.target.getAttribute('data-value');
+            const clickedIndex = event.target.getAttribute('data-index');
+            console.log('Clicked card details:', {
+                value: clickedValue,
+                index: clickedIndex,
+                text: event.target.textContent
+            });
+            vote(clickedValue);
         }
-
+        document.getElementById('cardDeck').addEventListener('click', function(event) {
+            if (event.target === this) {
+                console.log('Clicked on card deck, but not on a card');
+            }
+        });
         function vote(value) {
            console.log("vote function called with value:", value);
     console.log("Type of value:", typeof value);
