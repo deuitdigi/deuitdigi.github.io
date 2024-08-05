@@ -121,7 +121,9 @@
     border-radius: 4px;
     cursor: pointer;
 }
-
+#adminControls button:hover {
+background-color: #45a049;
+}
 #adminControls {
     display: flex;
     flex-direction: column;
@@ -315,9 +317,9 @@
             }
         });
         function vote(value) {
-           console.log("vote function called with value:", value);
-    console.log("Type of value:", typeof value);
-    console.log("cards array:", cards);
+            console.log("vote function called with value:", value);
+            console.log("Type of value:", typeof value);
+            console.log("cards array:", cards);
             console.log("Index of value in cards array:", cards.indexOf(value));
 
           
@@ -364,7 +366,7 @@
 
         function addUserToTeam() {
             db.collection('teams').doc(currentTeam).set({
-                [currentUser]: {vote: null, timestamp: Date.now()}
+                [currentUser]: {vote: '', timestamp: Date.now()}
             }, { merge: true });
         }
 
@@ -392,12 +394,12 @@
                 if (userName.toLowerCase() !== 'kris') {
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
                      // Adjust the radius to 40% of the circle's diameter
-                    const radius = 50;
+                    const radius = 65;
                     // Use Math.round to ensure pixel-perfect positioning
                     const x = Math.round(Math.cos(angle) * radius + 50);
                     const y = Math.round(Math.sin(angle) * radius + 50);
                     const userElement = document.createElement('div');
-                    userElement.className = 'user' + (userData.vote ? ' voted' : '');
+                    userElement.className = 'user';
                      // Use transform to center the user element on its position
                     userElement.style.left = `${x}%`;
                     userElement.style.top = `${y}%`;
