@@ -321,26 +321,36 @@
             cardDeck.innerHTML = ''; // Clear existing cards
             cards.forEach(card => {
                   const cardElement = document.createElement('button'); // Change to button for better semantics
-                    cardElement.className = 'card';
+                   cardElement.className = 'card';
                     cardElement.textContent = card;
                     cardElement.setAttribute('data-value', card);
+                    cardElement.setAttribute('data-index', index);
+                    console.log(`Creating card: ${card}, index: ${index}`);
                     cardDeck.appendChild(cardElement);
                 });
              cardDeck.addEventListener('click', cardClickHandler);
         }
-        function cardClickHandler(event) {
-           if (event.target.classList.contains('card')) {
-        const clickedValue = event.target.getAttribute('data-value');
-        console.log('Clicked card value:', clickedValue);
-        vote(clickedValue);
-        }
+       function cardClickHandler(event) {
+            if (event.target.classList.contains('card')) {
+                const clickedValue = event.target.getAttribute('data-value');
+                const clickedIndex = event.target.getAttribute('data-index');
+                const clickedText = event.target.textContent;
+                console.log('Clicked card details:', {
+                    value: clickedValue,
+                    index: clickedIndex,
+                    text: clickedText,
+                    element: event.target
+                });
+                vote(clickedValue);
+            }
         }
 
         function vote(value) {
            console.log("vote function called with value:", value);
     console.log("Type of value:", typeof value);
     console.log("cards array:", cards);
-    console.log("Is value in cards array:", cards.includes(value));
+            console.log("Index of value in cards array:", cards.indexOf(value));
+
           
             if (!isAdmin) {
                if (!cards.includes(value)) {
@@ -385,7 +395,7 @@
                     }
                 });
         }
-
+        
         function updateUserCircle(votes) {
             const userCircle = document.getElementById('userCircle');
             const centerArea = document.getElementById('centerArea');
@@ -469,6 +479,24 @@
                 console.error("Error clearing users: ", error);
             });
         }
+
+
+        const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+            console.log('Card deck modified:', mutation);
+        }
+        if (mutation.type === 'attributes') {
+            console.log('Card attribute changed:', mutation);
+        }
+    });
+});
+
+observer.observe(document.getElementById('cardDeck'), { 
+    childList: true, 
+    attributes: true, 
+    subtree: true 
+});
     </script>
 </body>
 </html>
