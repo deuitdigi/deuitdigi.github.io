@@ -320,25 +320,32 @@
             const cardDeck = document.getElementById('cardDeck');
             cardDeck.innerHTML = ''; // Clear existing cards
             cards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.textContent = card;
-                cardElement.onclick = (e) => {
-                    e.stopPropagation(); // Prevent event bubbling
-                    vote(card); // Pass the card value directly
-                    console.log('Clicked card value:', card); // Log the clicked card value
-                };
-                cardDeck.appendChild(cardElement);
-            });
+                 const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.textContent = card;
+                    cardElement.setAttribute('data-value', card);
+                    cardElement.addEventListener('click', cardClickHandler);
+                    cardDeck.appendChild(cardElement);
+                });
+        }
+        function cardClickHandler(event) {
+            event.stopPropagation(); // Prevent event bubbling
+            const clickedValue = event.target.getAttribute('data-value');
+            console.log('Clicked card value:', clickedValue);
+            vote(clickedValue);
         }
 
         function vote(value) {
-             console.log("vote function called");
-            console.log("User:", currentUser, "Vote:", value);
-            console.log("Current team:", currentTeam);
+            console.log("vote function called with value:", value);
+          
             if (!isAdmin) {
-                console.log("vote function called");
+               if (!cards.includes(value)) {
+                    console.error("Invalid vote value:", value);
+                    return;
+                }
                 console.log("User:", currentUser, "Vote:", value);
+                console.log("Current team:", currentTeam);
+                
                 db.collection('teams').doc(currentTeam).set({
                     [currentUser]: {vote: value, timestamp: Date.now()}
                 }, { merge: true }).then(() => {
