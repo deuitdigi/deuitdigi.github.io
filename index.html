@@ -440,14 +440,21 @@ background-color: #45a049;
             db.collection('teams').doc(currentTeam).get().then((doc) => {
                 if (doc.exists) {
                     const users = doc.data();
+                    const updatedUsers = {};
                     Object.keys(users).forEach(user => {
-                        users[user].vote = null;
+                        updatedUsers[user] = { ...users[user], vote: '' };
                     });
                     return db.collection('teams').doc(currentTeam).set(users);
                 }
             }).then(() => {
                 console.log("Votes reset successfully");
-                updateUserCircle({}); // Clear the displayed votes
+                 document.querySelectorAll('.user-card').forEach(card => {
+                    card.textContent = '';
+                    card.classList.remove('voted');
+                });
+                   document.querySelectorAll('#cardDeck .card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
             }).catch((error) => {
                 console.error("Error resetting votes: ", error);
             });
