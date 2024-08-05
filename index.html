@@ -321,7 +321,11 @@
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
                 cardElement.textContent = card;
-                cardElement.onclick = () => vote(card);
+                cardElement.onclick = (e) => {
+                    e.stopPropagation(); // Prevent event bubbling
+                    vote(card); // Pass the card value directly
+                    console.log('Clicked card value:', card); // Log the clicked card value
+                };
                 cardDeck.appendChild(cardElement);
             });
         }
