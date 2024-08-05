@@ -320,23 +320,27 @@
             const cardDeck = document.getElementById('cardDeck');
             cardDeck.innerHTML = ''; // Clear existing cards
             cards.forEach(card => {
-                 const cardElement = document.createElement('div');
+                  const cardElement = document.createElement('button'); // Change to button for better semantics
                     cardElement.className = 'card';
                     cardElement.textContent = card;
                     cardElement.setAttribute('data-value', card);
-                    cardElement.addEventListener('click', cardClickHandler);
                     cardDeck.appendChild(cardElement);
                 });
+             cardDeck.addEventListener('click', cardClickHandler);
         }
         function cardClickHandler(event) {
-            event.stopPropagation(); // Prevent event bubbling
-            const clickedValue = event.target.getAttribute('data-value');
-            console.log('Clicked card value:', clickedValue);
-            vote(clickedValue);
+           if (event.target.classList.contains('card')) {
+        const clickedValue = event.target.getAttribute('data-value');
+        console.log('Clicked card value:', clickedValue);
+        vote(clickedValue);
+        }
         }
 
         function vote(value) {
-            console.log("vote function called with value:", value);
+           console.log("vote function called with value:", value);
+    console.log("Type of value:", typeof value);
+    console.log("cards array:", cards);
+    console.log("Is value in cards array:", cards.includes(value));
           
             if (!isAdmin) {
                if (!cards.includes(value)) {
