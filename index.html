@@ -319,21 +319,20 @@
         function renderCardDeck() {
             const cardDeck = document.getElementById('cardDeck');
             cardDeck.innerHTML = ''; // Clear existing cards
-            cards.forEach(card => {
-                  const cardElement = document.createElement('button'); // Change to button for better semantics
-                   cardElement.className = 'card';
-                    cardElement.textContent = card;
-                    cardElement.setAttribute('data-value', card);
-                    cardElement.setAttribute('data-index', index);
-                    cardElement.addEventListener('click', cardClickHandler);
-                    console.log(`Creating card: ${card}, index: ${index}`);
-                    cardDeck.appendChild(cardElement);
-                });
-             cardDeck.addEventListener('click', cardClickHandler);
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('button');
+                cardElement.className = 'card';
+                cardElement.textContent = card;
+                cardElement.setAttribute('data-value', card);
+                cardElement.setAttribute('data-index', index.toString());
+                cardElement.addEventListener('click', cardClickHandler);
+                console.log(`Creating card: ${card}, index: ${index}`);
+                cardDeck.appendChild(cardElement);
+            });
         }
        function cardClickHandler(event) {
             const clickedValue = event.target.getAttribute('data-value');
-            const clickedIndex = event.target.getAttribute('data-index');
+            const clickedIndex = parseInt(event.target.getAttribute('data-index'), 10);
             console.log('Clicked card details:', {
                 value: clickedValue,
                 index: clickedIndex,
