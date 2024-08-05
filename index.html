@@ -327,6 +327,9 @@
         }
 
         function vote(value) {
+             console.log("vote function called");
+            console.log("User:", currentUser, "Vote:", value);
+            console.log("Current team:", currentTeam);
             if (!isAdmin) {
                 console.log("vote function called");
                 console.log("User:", currentUser, "Vote:", value);
@@ -334,10 +337,20 @@
                     [currentUser]: {vote: value, timestamp: Date.now()}
                 }, { merge: true }).then(() => {
                     console.log("Vote saved successfully");
+                      return db.collection('teams').doc(currentTeam).get();
+                        }).then((doc) => {
+                            if (doc.exists) {
+                                console.log("Updated team data:", doc.data());
+                                console.log("User's vote:", doc.data()[currentUser]);
+                            } else {
+                                console.log("No team document found after voting");
+                            }
                 }).catch((error) => {
                     console.error("Error saving vote:", error);
                 });
-            }
+            }else {
+        console.log("Vote function called by admin - no action taken");
+        }
         }
 
         function addUserToTeam() {
