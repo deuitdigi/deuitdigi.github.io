@@ -376,6 +376,16 @@ background-color: #45a049;
                     if (doc.exists) {
                         const votes = doc.data();
                         updateUserCircle(votes);
+                             Object.entries(votes).forEach(([userName, userData]) => {
+                        const userCard = document.querySelector(`.user-card[data-user="${userName}"]`);
+                        if (userCard) {
+                            if (userData.vote) {
+                                userCard.classList.add('voted');
+                            } else {
+                                userCard.classList.remove('voted');
+                            }
+                        }
+                    });
                     }
                 });
         }
