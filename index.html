@@ -278,6 +278,8 @@
             }
         });
         document.addEventListener('DOMContentLoaded', (event) => {
+            console.log("Available cards:", cards);
+
             const revealButton = document.getElementById('revealButton');
             if (revealButton) {
                 revealButton.addEventListener('click', () => {
