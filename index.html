@@ -115,6 +115,9 @@
             margin-top: 20px;
         }
         @media (max-width: 600px) {
+            .h2{
+               padding-bottom: 5vh;"
+            }
             .user-circle {
                 max-width: 250px;               
             width: 100%;
@@ -208,7 +211,7 @@
             const users = userCircle.querySelectorAll('.user');
     
             const centerRect = centerArea.getBoundingClientRect();
-            const padding = 20; // Padding around the center area
+            const padding = 10; // Padding around the center area
     
             users.forEach((user, index) => {
                 const totalUsers = users.length;
