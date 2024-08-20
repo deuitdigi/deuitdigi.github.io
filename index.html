@@ -48,7 +48,7 @@
         }
         .user {
             position: absolute;
-            width: 80px;
+            /* width: 80px; */
             text-align: center;
         }
         .user-avatar {
@@ -62,30 +62,35 @@
             margin: 0 auto 5px;
             font-weight: bold;
         }
-        .user-card {
+        .user  .user-card {
             width: 40px;
             height: 60px;
-            background-color: #fff;
-            border: 2px solid #000;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            margin: 0 auto 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
         }
         .voted .user-card {
             background-color: purple;
             color: white;
         }
         #centerArea {
+            background-color: #e6f2ff;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1;
+            /*
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: center; */
         }
         #krisAvatar {
             width: 100px;
