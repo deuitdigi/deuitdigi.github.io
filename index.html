@@ -205,7 +205,27 @@
                 document.getElementById('nameInput').style.display = 'block';
             }
         });
+     function positionUsers() {
+            const userCircle = document.getElementById('userCircle');
+            const centerArea = document.getElementById('centerArea');
+            const users = userCircle.querySelectorAll('.user');
+    
+            const centerRect = centerArea.getBoundingClientRect();
+            const padding = 20; // Padding around the center area
+    
+            users.forEach((user, index) => {
+                const totalUsers = users.length;
+                const angle = (index / totalUsers) * 2 * Math.PI;
+                const radius = Math.min(centerRect.width, centerRect.height) / 2 + padding;
+    
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+    
+                user.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        }
 
+           
         function joinTeam() {
             currentTeam = document.getElementById('teamSelect').value;
             currentUser = document.getElementById('userName').value;
@@ -293,6 +313,9 @@
                     index++;
                 }
             });
+             positionUsers();
+           
+         
         }
 
         function revealVotes() {
@@ -338,6 +361,9 @@
                 console.error("Error clearing users: ", error);
             });
         }
+             // Call this function after updating the user circle
+            window.addEventListener('load', positionUsers);
+            window.addEventListener('resize', positionUsers);
     </script>
 </body>
 </html>
