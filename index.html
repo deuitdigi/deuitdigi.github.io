@@ -65,14 +65,16 @@
         
         .user-card {
                 width: 40px;
-                height: 60px;
-                background-color: white;
+                height: 50px;
+                background-color: #f0f0f0;
                 border: 1px solid #ccc;
-                border-radius: 5px;
+                border-radius: 50%;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                font-size: 14px;
+                font-size: 1em;
+                margin-bottom: 5px;
+                transition: background-color 0.3s;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
         .user-card::before {
@@ -282,10 +284,25 @@
 
         function vote(value) {
             if (!isAdmin) {
-                db.collection('teams').doc(currentTeam).set({
-                    [currentUser]: {vote: value, timestamp: Date.now()}
-                }, { merge: true });
-            }
+                console.log("vote function called with value:", value);
+        
+                // Update the UI to show the selected card
+                document.querySelectorAll('#cardDeck .card').forEach(card => {
+                    card.classList.remove('selected');
+                    if (card.getAttribute('data-value') === value) {
+                        card.classList.add('selected');
+                    }
+                });
+                 db.collection('teams').doc(currentTeam).set({
+                            [currentUser]: {vote: value, timestamp: Date.now()}
+                        }, { merge: true }).then(() => {
+                            console.log("Vote saved successfully");
+                        }).catch((error) => {
+                            console.error("Error saving vote:", error);
+                        });
+                    } else {
+                        console.log("Vote function called by admin - no action taken");
+                    }
         }
 
         function addUserToTeam() {
@@ -311,8 +328,11 @@
             userCircle.appendChild(centerArea);
             const userCount = Object.keys(votes).length;
             let index = 0;
+            const horizontalRadius = 70;
+            const verticalRadius = 45;
             Object.entries(votes).forEach(([userName, userData]) => {
                 if (userName.toLowerCase() !== 'kris') {
+                    
                     const angle = (index / (userCount - 1)) * 2 * Math.PI;
                      // Adjust the radius to 40% of the circle's diameter
                     const radius = 30;
